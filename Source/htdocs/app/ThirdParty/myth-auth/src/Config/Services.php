@@ -57,7 +57,7 @@ class Services extends BaseService
 	 * @param Auth|null $config
 	 * @param bool      $getShared
 	 *
-	 * @return ValidatorInterface
+	 * @return PasswordValidator
 	 */
 	public static function passwords(Auth $config = null, bool $getShared = true): PasswordValidator
 	{

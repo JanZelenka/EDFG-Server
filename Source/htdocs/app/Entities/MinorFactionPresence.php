@@ -1,6 +1,5 @@
 <?php
 namespace app\Entities;
-
 use CodeIgniter\Entity\Entity;
 
 /**
@@ -8,12 +7,11 @@ use CodeIgniter\Entity\Entity;
  * @author Jan Zelenka <jan.zelenka@clickworks.eu>
  *
  * @property int id
- * @property float coordX
- * @property float coordY
- * @property float coordZ
- * @property string name
+ * @property int minorFactionId
+ * @property int starSystemId
+ *
  */
-class StarSystem extends Entity
+class MinorFactionPresence extends Entity
 {
 }
 

@@ -3,6 +3,7 @@
 namespace Config;
 
 use CodeIgniter\Config\BaseService;
+use app\Libraries\StarCatalogue;
 
 /**
  * Services Configuration file.
@@ -28,4 +29,16 @@ class Services extends BaseService
 	//
 	//     return new \CodeIgniter\Example();
 	// }
+
+	/**
+	 *
+	 * @param boolean $blnGetShared
+	 * @return StarCatalogue\StarCatalogueInterface
+	 */
+    public static function starCatalogue ( $blnGetShared = true ): StarCatalogue\StarCatalogueInterface {
+        if ( $blnGetShared )
+            return static::getSharedInstance( 'starCatalogue' );
+
+        return new StarCatalogue\EDStarMap();
+    }
 }
