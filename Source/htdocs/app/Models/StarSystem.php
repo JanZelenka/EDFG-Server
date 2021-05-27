@@ -2,23 +2,23 @@
 
 namespace app\Models;
 
-use CodeIgniter\Model;
+use app\Entities\StarSystem as StarSystemEntity;
 
 /**
  *
  * @author Jan Zelenka <jan.zelenka@telenet.be>
  *
  */
-class StarSystem extends Model {
-    protected $table = 'auth_logins';
+class StarSystem extends StampedModel {
+    protected $table = 'star_system';
     protected $primaryKey = 'id';
-    protected $returnType = 'object';
+    protected $returnType = StarSystemEntity::class;
     protected $useSoftDeletes = false;
     protected $allowedFields = [
-        'coordX'
+        'id'
+        , 'coordX'
         , 'coordY'
         , 'coordZ'
-        , 'zzzCreatedBy'
-        , 'zzzModifiedBy'
+        , 'name'
         ];
     }

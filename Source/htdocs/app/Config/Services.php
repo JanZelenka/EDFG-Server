@@ -3,7 +3,8 @@
 namespace Config;
 
 use CodeIgniter\Config\BaseService;
-use app\Libraries\StarCatalogue;
+use app\Libraries\MinorFactionCatalogue;
+use app\Libraries\StarSystemCatalogue;
 
 /**
  * Services Configuration file.
@@ -33,12 +34,25 @@ class Services extends BaseService
 	/**
 	 *
 	 * @param boolean $blnGetShared
-	 * @return StarCatalogue\StarCatalogueInterface
+	 * @return \app\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface
 	 */
-    public static function starCatalogue ( $blnGetShared = true ): StarCatalogue\StarCatalogueInterface {
+	public function minorFactionCatalogue ( $blnGetShared = true ): MinorFactionCatalogue\MinorFactionCatalogueInterface {
+	    if ( $blnGetShared )
+	        return static::getSharedInstance( 'minorFactionCatalogue' );
+
+	        return new MinorFactionCatalogue\EliteBGS();
+	}
+
+
+	/**
+	 *
+	 * @param boolean $blnGetShared
+	 * @return \app\Libraries\StarSystemCatalogue\StarSystemCatalogueInterface
+	 */
+    public static function starCatalogue ( $blnGetShared = true ): StarSystemCatalogue\StarSystemCatalogueInterface {
         if ( $blnGetShared )
             return static::getSharedInstance( 'starCatalogue' );
 
-        return new StarCatalogue\EDStarMap();
+        return new StarSystemCatalogue\EDStarMap();
     }
 }

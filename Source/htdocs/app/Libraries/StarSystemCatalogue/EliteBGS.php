@@ -2,7 +2,7 @@
 namespace app\Libraries\StarSystemCatalogue;
 
 use Config\Services;
-
+use app\Entities\StarSystem;
 /**
  *
  * @author Jan Zelenka <jan.zelenka@clickworks.eu>
@@ -17,10 +17,12 @@ class EliteBGS implements StarSystemCatalogueInterface
      */
     public function getStarSystems ( array $arrParams )
     {
-        /** @var \CodeIgniter\HTTP\CURLRequest $objClient */
-        /** @var \CodeIgniter\HTTP\Response $objResponse */
-        /** @var \app\Entities\StarSystem $objStarSystem */
-        /** @var \Config\EliteBGS $objConfig */
+        /**
+         * @var \CodeIgniter\HTTP\CURLRequest $objClient
+         * @var \CodeIgniter\HTTP\Response $objResponse
+         * @var \app\Entities\StarSystem $objStarSystem
+         * @var \Config\EliteBGS $objConfig
+         */
 
         if ( isset( $arrParams[ 'id' ] ) )
             $strUrlParams = 'id=' . urlencode( $arrParams[ 'id' ] );
@@ -39,7 +41,8 @@ class EliteBGS implements StarSystemCatalogueInterface
 
         if ($objResponse->getStatusCode() < 300 ) {
             foreach ( $objResponse->getBody()->docs as $objSourceStarSystem ) {
-                $objStarSystem = new \app\Entities\StarSystem();
+                $objStarSystem = new StarSystem();
+                $objStarSystem->id = $objSourceStarSystem->eddb_id;
                 $objStarSystem->name = $objSourceStarSystem->name;
                 $objStarSystem->coordX = $objSourceStarSystem->x;
                 $objStarSystem->coordY = $objSourceStarSystem->y;

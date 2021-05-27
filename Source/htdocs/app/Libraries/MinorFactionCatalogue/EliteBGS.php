@@ -4,6 +4,7 @@ namespace app\Libraries\MinorFactionCatalogue;
 use Config\Services;
 use app\Entities\MinorFaction as MinorFactionEntity;
 use app\Entities\MinorFactionPresence as MinorFactionPresenceEntity;
+
 /**
  *
  * @author Jan Zelenka <jan.zelenka@clickworks.eu>
@@ -11,25 +12,72 @@ use app\Entities\MinorFactionPresence as MinorFactionPresenceEntity;
  */
 class EliteBGS implements MinorFactionCatalogueInterface
 {
-    protected $objMinorFaction = null;
-    protected $intMinorFactionId = null;
-    protected $arrPresence = null;
+    protected $arrMinorFactionData = array();
+
+    /**
+     * (non-PHPdoc)
+     *
+     * @see \app\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface::getMinorFaction()
+     */
+    public function getMinorFaction (
+            array $arrParams
+            , MinorFactionEntity $objEntity = null
+            ): MinorFactionEntity
+    {
+        /**
+         * @var \app\Entities\MinorFaction $objMinorFaction
+         */
+
+        $strName = $arrParams[ 'name' ] ?? null;
+
+        if ( is_null( $strName ) ) {
+            throw new \Exception( 'No recognized parameters specified.' );
+        }
+
+        if ( ! isset( $this->arrMinorFactionData[ $strName ] ) ) {
+            if ( ! $this->loadMinorFaction( $arrParams ) ) {
+                return false;
+            }
+        }
+
+        $objData = $this->arrMinorFactionData[ $strName ];
+
+        if ( is_null( $objEntity ) ) {
+            $objEntity = new MinorFactionEntity();
+        }
+
+        $objEntity->id = $objData->eddb_id;
+        $objEntity->name = $objData->name;
+        $objEntity->ebgsId = $objData->{'_id'};
+        return $objMinorFaction;
+    }
+
+    public function getMinorFactionPresence (
+            array $arrParams
+            , array $arrMinorFactionPresence = null
+            ): array {
+        ;
+    }
 
     /**
      *
      * @param array $arrParams
      * @throws \Exception
      */
-    protected function loadMinorFaction ( array $arrParams ) {
-        /** @var \CodeIgniter\HTTP\CURLRequest $objClient */
-        /** @var \CodeIgniter\HTTP\Response $objResponse */
-        /** @var \app\Entities\MinorFactionPresence $objMinorFactionPresence */
+    protected function loadMinorFaction ( array $arrParams ): bool {
+        /**
+         * @var \CodeIgniter\HTTP\CURLRequest $objClient
+         * @var \CodeIgniter\HTTP\Response $objResponse
+         * @var \app\Entities\MinorFactionPresence $objMinorFactionPresence
+         */
 
-        if ( isset( $arrParams[ 'name' ] ) )
-            $strUrlParams = 'name=' . $arrParams[ 'name' ];
-        else
+        $strMinorFactionName = $arrParams[ 'name' ] ?? null;
+
+        if ( is_null( $strMinorFactionName ) ) {
             throw new \Exception( 'No recognized parameters specified.' );
+        }
 
+        $strUrlParams = 'name=' . urlencode($strMinorFactionName);
         $objConfig = config( 'EliteBGS');
         $objClient = Services::curlrequest();
         $objResponse = $objClient->request(
@@ -37,31 +85,29 @@ class EliteBGS implements MinorFactionCatalogueInterface
                 , $objConfig->strUrlRoot & 'factions?' & $strUrlParams
                 );
 
-        if ($objResponse->getStatusCode() < 300 ) {
-            $this->objMinorFaction = new MinorFactionEntity();
-            $objMinorFactionData = $objResponse->getBody()->docs[0];
-            $this->objMinorFaction->name = $objMinorFactionData->name;
-            $this->objMinorFaction->ebgsId = $objMinorFactionData->{'_id'};
+        if ( $objResponse->getStatusCode() < 300 ) {
+            $blnSuccess = $objResponse->getBody()->total;
 
-            $this->arrPresence = array();
-
-            foreach ( $objMinorFactionData->faction_presence as $objPresenceData ) {
-                $objMinorFactionPresence = new MinorFactionPresenceEntity();
-                $objMinorFactionPresence->
+            if ( $blnSuccess ) {
+                $this->arrMinorFactionData[ $strMinorFactionName ] = $objResponse->getBody()->docs[0];
             }
+        } else {
+            $blnSuccess = false;
         }
-    }
 
-    /**
-     * (non-PHPdoc)
-     *
-     * @see \app\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface::getMinorFaction()
-     */
-    public function getMinorFaction ( array $arrParams ): MinorFactionEntity {
-        if ( is_null( $this->objMinorFaction ) )
-            $this->loadMinorFaction( $arrParams );
+        return $blnSuccess;
+                    /*
+                     $objMinorFaction = new MinorFactionEntity();
+                     $objMinorFactionData = $objResponse->getBody()->docs[0];
+                     $objMinorFaction->name = $objMinorFactionData->name;
+                     $objMinorFaction->ebgsId = $objMinorFactionData->{'_id'};
+                     $this->arrMinorFactions[ $objMinorFaction->name ] = $objMinorFaction;
 
-        return $this->objMinorFaction;
+                     foreach ( $objMinorFactionData->faction_presence as $objPresenceData ) {
+                     $objMinorFactionPresence = new MinorFactionPresenceEntity();
+                     $objMinorFactionPresence->minorFactionId = $this->intMinorFactionId;
+                     }
+                     */
     }
 }
 

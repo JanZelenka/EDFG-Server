@@ -9,7 +9,7 @@ use CodeIgniter\Model;
  * @author Jan Zelenka <jan.zelenka@telenet.be>
  *
  */
-class SysStampedModel extends Model {
+class StampedModel extends Model {
     /**
      *
      */
