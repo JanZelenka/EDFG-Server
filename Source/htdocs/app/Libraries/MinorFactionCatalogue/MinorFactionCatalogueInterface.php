@@ -1,8 +1,8 @@
 <?php
 namespace app\Libraries\MinorFactionCatalogue;
 
-use app\Entities\MinorFaction as MinorFactionEntity;
-use app\Entities\MinorFactionPresence as MinorFactionPresenceEntity;
+use app\Entities\MinorFaction;
+use app\Entities\MinorFactionPresence;
 
 /**
  *
@@ -19,8 +19,8 @@ interface MinorFactionCatalogueInterface
      */
     public function getMinorFaction (
             array $arrParams
-            , MinorFactionEntity $objMinorFaction = null
-            ): MinorFactionEntity;
+            , MinorFaction $objMinorFaction = null
+            ): MinorFaction;
 
     /**
      *
@@ -31,6 +31,6 @@ interface MinorFactionCatalogueInterface
     public function getMinorFactionPresence(
             array $arrParams
             , array $arrMinorFactionPresence = null
-            ): MinorFactionPresenceEntity;
+            ): MinorFactionPresence;
 }
 

@@ -3,8 +3,8 @@
 namespace Config;
 
 use CodeIgniter\Config\BaseService;
-use app\Libraries\MinorFactionCatalogue;
-use app\Libraries\StarSystemCatalogue;
+use \app\Libraries\MinorFactionCatalogue;
+use \app\Libraries\StarSystemCatalogue;
 
 /**
  * Services Configuration file.

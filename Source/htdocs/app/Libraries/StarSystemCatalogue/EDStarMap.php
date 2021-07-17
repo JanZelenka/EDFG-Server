@@ -5,7 +5,7 @@ use Config\Services;
 
 /**
  *
- * @author Jan Zelenka <jan.zelenka@clickworks.eu>
+ * @author Jan Zelenka <jan.zelenka@telenet.be>
  *
  */
 class EDStarMap implements StarSystemCatalogueInterface

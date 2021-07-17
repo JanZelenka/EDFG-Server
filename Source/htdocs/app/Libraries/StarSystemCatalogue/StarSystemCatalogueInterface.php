@@ -1,17 +1,17 @@
 <?php
 namespace app\Libraries\StarSystemCatalogue;
 
-use app\Entities\StarSystem as StarSystemEntity;
+use app\Entities\StarSystem;
 
 /**
  *
- * @author Jan Zelenka <jan.zelenka@clickworks.eu>
+ * @author Jan Zelenka <jan.zelenka@telenet.be>
  *
  */
 interface StarSystemCatalogueInterface
 {
     /**
-     * @return StarSystemEntity[]
+     * @return StarSystem[]
      * @param array $arrParams
      */
     public function getStarSystems ( array $arrParams ) : array;

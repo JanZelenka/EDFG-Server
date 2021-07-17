@@ -5,7 +5,7 @@ use Config\Services;
 use app\Entities\StarSystem;
 /**
  *
- * @author Jan Zelenka <jan.zelenka@clickworks.eu>
+ * @author Jan Zelenka <jan.zelenka@telenet.be>
  *
  */
 class EliteBGS implements StarSystemCatalogueInterface

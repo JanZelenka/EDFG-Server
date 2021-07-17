@@ -2,8 +2,8 @@
 namespace app\Libraries\MinorFactionCatalogue;
 
 use Config\Services;
-use app\Entities\MinorFaction as MinorFactionEntity;
-use app\Entities\MinorFactionPresence as MinorFactionPresenceEntity;
+use app\Entities\MinorFaction;
+use app\Entities\MinorFactionPresence;
 
 /**
  *
@@ -21,8 +21,8 @@ class EliteBGS implements MinorFactionCatalogueInterface
      */
     public function getMinorFaction (
             array $arrParams
-            , MinorFactionEntity $objEntity = null
-            ): MinorFactionEntity
+            , MinorFaction $objEntity
+            ): MinorFaction
     {
         /**
          * @var \app\Entities\MinorFaction $objMinorFaction
@@ -41,10 +41,6 @@ class EliteBGS implements MinorFactionCatalogueInterface
         }
 
         $objData = $this->arrMinorFactionData[ $strName ];
-
-        if ( is_null( $objEntity ) ) {
-            $objEntity = new MinorFactionEntity();
-        }
 
         $objEntity->id = $objData->eddb_id;
         $objEntity->name = $objData->name;
