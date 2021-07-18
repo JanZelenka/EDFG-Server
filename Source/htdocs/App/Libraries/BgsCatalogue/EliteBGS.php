@@ -22,16 +22,16 @@ class EliteBGS implements BgsCatalogueInterface
         $objClient = Services::curlrequest();
         $objResponse = $objClient->request(
                 'GET'
-                , $objConfig->strUrlRoot & 'ticks'
+                , $objConfig->strUrlRoot . 'ticks'
                 );
 
         if ( $objResponse->getStatusCode() < 300 ) {
-            $objResponse = $objResponse->getBody();
+            $objResponseBody = json_decode( $objResponse->getBody());
 
-            if ( $objResponse->{_id} !== $objBgsTick->ebgsId )
+            if ( $objResponseBody[0]->_id !== $objBgsTick->ebgsId )
                 $objBgsTick = new BgsTick(
-                        $objResponse->{_id}
-                        , $objResponse->time
+                        $objResponseBody[0]->_id
+                        , $objResponseBody[0]->time
                         );
 
             $objBgsTick->lastCheckOn = new \DateTime();

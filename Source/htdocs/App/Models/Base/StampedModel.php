@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Base;
 
 use CodeIgniter\Model;
+use CodeIgniter\Database\ConnectionInterface;
+use CodeIgniter\Validation\ValidationInterface;
 
 /**
  *
@@ -13,7 +15,12 @@ class StampedModel extends Model {
     /**
      *
      */
-    public function __construct() {
+    public function __construct(
+            ConnectionInterface &$db = null
+            , ValidationInterface $validation = null
+            )
+    {
+        parent::__construct();
         $this->allowedFields[] = 'zzzCreatedBy';
         $this->allowedFields[] = 'zzzModifiedBy';
     }

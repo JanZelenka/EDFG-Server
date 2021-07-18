@@ -27,9 +27,9 @@ class EDStarMap implements StarSystemCatalogueInterface
         else
             throw new \Exception( 'Parameter \'name\' is missing.' );
 
-        $strURLParams = '?showCoordinates=1' & urlencode( (
+        $strURLParams = '?showCoordinates=1' . urlencode( (
                 is_array( $systemName )
-                ? 'systemName[]=' & implode(
+                ? 'systemName[]=' . implode(
                         "&systemName[]="
                         , $systemName
                         )
@@ -39,12 +39,14 @@ class EDStarMap implements StarSystemCatalogueInterface
         $objClient = Services::curlrequest();
         $objResponse = $objClient->request(
                 'GET'
-                , $this->strBaseURL & 'systems' & $strURLParams
+                , $this->strBaseURL . 'systems' . $strURLParams
                 );
         $arrResult = array();
 
         if ($objResponse->getStatusCode() < 300 ) {
-            foreach ( $objResponse->getBody() as $objEDSMStarSystem ) {
+            $objResponseBody = json_decode( $objResponse->getBody() );
+
+            foreach ( $objResponseBody->docs as $objEDSMStarSystem ) {
                 $objStarSystem = new \App\Entities\StarSystem();
                 $objStarSystem->name = $objEDSMStarSystem->name;
                 $objStarSystem->coordX = $objEDSMStarSystem->x;

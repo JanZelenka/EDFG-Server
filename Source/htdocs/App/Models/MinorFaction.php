@@ -8,7 +8,7 @@ use App\Entities\MinorFaction as MinorFactionEntity;
  * @author Jan Zelenka <jan.zelenka@clickworks.eu>
  *
  */
-class MinorFaction extends StampedModel
+class MinorFaction extends Base\StampedModel
 {
     protected $table = 'minor_faction';
     protected $primaryKey = 'id';

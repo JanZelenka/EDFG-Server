@@ -78,14 +78,15 @@ class EliteBGS implements MinorFactionCatalogueInterface
         $objClient = Services::curlrequest();
         $objResponse = $objClient->request(
                 'GET'
-                , $objConfig->strUrlRoot & 'factions?' & $strUrlParams
+                , $objConfig->strUrlRoot . 'factions?' . $strUrlParams
                 );
 
         if ( $objResponse->getStatusCode() < 300 ) {
-            $blnSuccess = $objResponse->getBody()->total;
+            $objResponseBody = json_decode( $objResponse->getBody() );
+            $blnSuccess = $objResponseBody->total;
 
             if ( $blnSuccess ) {
-                $this->arrMinorFactionData[ $strMinorFactionName ] = $objResponse->getBody()->docs[0];
+                $this->arrMinorFactionData[ $strMinorFactionName ] = $objResponseBody->docs[0];
             }
         } else {
             $blnSuccess = false;

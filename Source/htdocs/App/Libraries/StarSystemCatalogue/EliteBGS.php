@@ -35,12 +35,14 @@ class EliteBGS implements StarSystemCatalogueInterface
         $objClient = Services::curlrequest();
         $objResponse = $objClient->request(
                 'GET'
-                , $objConfig->strUrlRoot & 'systems?' & $strUrlParams
+                , $objConfig->strUrlRoot . 'systems?' . $strUrlParams
                 );
         $arrResult = array();
 
         if ($objResponse->getStatusCode() < 300 ) {
-            foreach ( $objResponse->getBody()->docs as $objSourceStarSystem ) {
+            $objResponseBody = json_decode( $objResponse->getBody() );
+
+            foreach ( $objResponseBody->docs as $objSourceStarSystem ) {
                 $objStarSystem = new StarSystem();
                 $objStarSystem->id = $objSourceStarSystem->eddb_id;
                 $objStarSystem->name = $objSourceStarSystem->name;

@@ -14,7 +14,7 @@ use App\Models\ModelsService;
  */
 class BgsTick extends Entity
 {
-    private function __construct (
+    public function __construct (
             string $strEbgsId = null
             , \DateTime $dtmOccuredOn = null
             , \DateTime $dtmLastCheckOn = null          )
@@ -26,7 +26,7 @@ class BgsTick extends Entity
         $objAppConfig = config( 'App' );
 
         if ( is_null( $dtmOccuredOn ) ) {
-            $objExpiredInterval = new \DateInterval( 'P' . ( $objAppConfig->TickExpiryPeriod + 1 ) . 'S' );
+            $objExpiredInterval = new \DateInterval( 'PT' . ( $objAppConfig->TickExpiryPeriod + 1 ) . 'S' );
             $objExpiredInterval->invert = 1;
             $this->occuredOn = ( new \DateTime() )->add( $objExpiredInterval );
         } else {
@@ -34,7 +34,7 @@ class BgsTick extends Entity
         }
 
         if ( is_null( $dtmLastCheckOn ) ) {
-            $objExpiredInterval = new \DateInterval( 'P' . ( $objAppConfig->TickCheckExpiryPeriod + 1 ) . 'S' );
+            $objExpiredInterval = new \DateInterval( 'PT' . ( $objAppConfig->TickCheckExpiryPeriod + 1 ) . 'S' );
             $objExpiredInterval->invert = 1;
             $this->lastCheckOn = ( new \DateTime() )->add( $objExpiredInterval );
 
@@ -90,7 +90,7 @@ class BgsTick extends Entity
     public function isExpired() {
         /** @var \Config\App $objAppConfig */
         $objAppConfig = config( 'App' );
-        $objExpiryInterval = new \DateInterval( 'P' . $objAppConfig->TickExpiryPeriod . 'S' );
+        $objExpiryInterval = new \DateInterval( 'PT' . $objAppConfig->TickExpiryPeriod . 'S' );
         $objExpiryInterval->invert = 1;
         $objExpiresOn = ( new \DateTime() )->add( $objExpiryInterval );
         return $this->occuredOn < $objExpiresOn;
@@ -99,7 +99,7 @@ class BgsTick extends Entity
     public function isCheckExpired() {
         /** @var \Config\App $objAppConfig */
         $objAppConfig = config( 'App' );
-        $objCheckExpiryInterval = new \DateInterval( 'P' . $objAppConfig->TickCheckExpiryPeriod. 'S' );
+        $objCheckExpiryInterval = new \DateInterval( 'PT' . $objAppConfig->TickCheckExpiryPeriod. 'S' );
         $objCheckExpiryInterval->invert = 1;
         $objCheckExpiresOn = ( new \DateTime() )->add( $objCheckExpiryInterval );
         return $this->lastCheckOn < $objCheckExpiresOn;

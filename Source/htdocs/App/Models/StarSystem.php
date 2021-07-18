@@ -9,7 +9,7 @@ use App\Entities\StarSystem as StarSystemEntity;
  * @author Jan Zelenka <jan.zelenka@telenet.be>
  *
  */
-class StarSystem extends StampedModel {
+class StarSystem extends Base\StampedModel {
     protected $table = 'star_system';
     protected $primaryKey = 'id';
     protected $returnType = StarSystemEntity::class;

@@ -7,7 +7,7 @@ use App\Entities\BgsTick as BgsTickEntity;
  * @author Jan Zelenka <jan.zelenka@telenet.be>
  *
  */
-class BgsTick extends StampedModel
+class BgsTick extends Base\StampedModel
 {
     protected $table = 'bgs_tick';
     protected $primaryKey = 'id';
@@ -19,10 +19,10 @@ class BgsTick extends StampedModel
             , 'occuredOn'
     ];
 
-    public function GetLastTick(): BgsTickEntity {
+    public function GetLastTick(): ?BgsTickEntity {
         return $this
             ->limit( 1 )
             ->orderBy( 'occuredOn', 'desc' )
-            ->find();
+            ->first();
     }
 }
