@@ -13,24 +13,16 @@ interface MinorFactionCatalogueInterface
 {
     /**
      *
-     * @param array $arrParams
      * @param \App\Entities\MinorFaction $objMinorFaction
-     * @return \App\Entities\MinorFaction
+     * @return bool
      */
-    public function getMinorFaction (
-            array $arrParams
-            , MinorFaction $objMinorFaction = null
-            ): MinorFaction;
+    public function getMinorFaction ( MinorFaction $objMinorFaction ): bool;
 
     /**
      *
-     * @param array $arrParams
-     * @param \App\Entities\MinorFactionPresence[] $arrMinorFactionPresence
-     * @return \App\Entities\MinorFactionPresence[]
+     * @param \App\Entities\MinorFaction $objMinorFaction
+     * @return bool
      */
-    public function getMinorFactionPresence(
-            array $arrParams
-            , array $arrMinorFactionPresence = null
-            ): MinorFactionPresence;
+    public function getMinorFactionPresence( MinorFaction $objMinorFaction ): bool;
 }
 

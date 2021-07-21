@@ -5,6 +5,7 @@ namespace App\Models\Base;
 use CodeIgniter\Model;
 use CodeIgniter\Database\ConnectionInterface;
 use CodeIgniter\Validation\ValidationInterface;
+use Config\Services;
 
 /**
  *
@@ -35,10 +36,15 @@ class StampedModel extends Model {
             , bool $returnId = true
             )
     {
-        if ( is_object( $data ) )
-            $data->zzzCreatedBy = $_SESSION[ 'User' ]->username;
-        elseif ( is_array( $data ) )
-            $data[ 'zzzCreatedBy' ] = $_SESSION[ 'User' ]->username;
+        $objSession = Services::session();
+        $objUser = $objSession->User;
+
+        if ( ! is_null( $objUser ) ) {
+            if ( is_object( $data ) )
+                $data->zzzCreatedBy = $objUser->username;
+            elseif ( is_array( $data ) )
+                $data[ 'zzzCreatedBy' ] = $objUser->username;
+        }
 
         return parent::insert(
                 $data
@@ -56,10 +62,15 @@ class StampedModel extends Model {
             , $data = null
             ): bool
     {
-        if ( is_object( $data ) )
-            $data->zzzModifiedBy = $_SESSION[ 'User' ]->username;
-        elseif ( is_array( $data ) )
-            $data[ 'zzzModifiedBy' ] = $_SESSION[ 'User' ]->username;
+        $objSession = Services::session();
+        $objUser = $objSession->User;
+
+        if ( ! is_null( $objUser ) ) {
+            if ( is_object( $data ) )
+                $data->zzzModifiedBy = $objUser->username;
+            elseif ( is_array( $data ) )
+                $data[ 'zzzModifiedBy' ] = $objUser->username;
+        }
 
         return parent::update(
                 $id

@@ -15,9 +15,12 @@ class MinorFaction extends Base\StampedModel
     protected $returnType = MinorFactionEntity::class;
     protected $useSoftDeletes = false;
     protected $allowedFields = [
-            'id'
-            , 'ebgsId'
+            'ebgsId'
+            , 'eddbId'
+            , 'allegiance'
+            , 'government'
             , 'name'
+            , 'updatedOn'
     ];
 
     public function function_name($param) {

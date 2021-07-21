@@ -1,19 +1,32 @@
 <?php
 namespace App\Entities;
-use CodeIgniter\Entity\Entity;
+
 use Config\Services;
-use App\Models\ModelsService;
+use App\Models\BgsTick as BgsTickModel;
+use CodeIgniter\Entity\Entity;
+use CodeIgniter\I18n\Time;
 
 /**
  *
  * @author Jan Zelenka <jan.zelenka@telenet.be>
  *
  * @property string ebgsId
- * @property \DateTime lastCheckOn
- * @property \DateTime occuredOn
+ * @property Time lastCheckOn
+ * @property Time occuredOn
  */
 class BgsTick extends Entity
 {
+    protected $dates = [
+        'lastCheckOn'
+        , 'occuredOn'
+    ];
+
+    /**
+     *
+     * @param string $strEbgsId
+     * @param \DateTime $dtmOccuredOn
+     * @param \DateTime $dtmLastCheckOn
+     */
     public function __construct (
             string $strEbgsId = null
             , \DateTime $dtmOccuredOn = null
@@ -28,7 +41,7 @@ class BgsTick extends Entity
         if ( is_null( $dtmOccuredOn ) ) {
             $objExpiredInterval = new \DateInterval( 'PT' . ( $objAppConfig->TickExpiryPeriod + 1 ) . 'S' );
             $objExpiredInterval->invert = 1;
-            $this->occuredOn = ( new \DateTime() )->add( $objExpiredInterval );
+            $this->occuredOn = Time::now()->add( $objExpiredInterval );
         } else {
             $this->occuredOn = $dtmOccuredOn;
         }
@@ -36,7 +49,7 @@ class BgsTick extends Entity
         if ( is_null( $dtmLastCheckOn ) ) {
             $objExpiredInterval = new \DateInterval( 'PT' . ( $objAppConfig->TickCheckExpiryPeriod + 1 ) . 'S' );
             $objExpiredInterval->invert = 1;
-            $this->lastCheckOn = ( new \DateTime() )->add( $objExpiredInterval );
+            $this->lastCheckOn = Time::now()->add( $objExpiredInterval );
 
         } else {
             $this->lastCheckOn = $dtmLastCheckOn;
@@ -45,10 +58,10 @@ class BgsTick extends Entity
 
     public static function refreshTick() {
         $objSession = Services::session();
-        $objLastTick = $objSession->LastTick;
+        $objLastTick = $objSession->LastBgsTick;
 
         if ( is_null( $objLastTick ) ) {
-            $objBgsTickModel = ModelsService::BgsTick();
+            $objBgsTickModel = model( BgsTickModel::class );
             $objLastTick = $objBgsTickModel->GetLastTick();
 
             if ( is_null( $objLastTick ) )
@@ -64,7 +77,7 @@ class BgsTick extends Entity
                 $blnStillExpired = true;
 
                 if ( ! $blnIsLoaded ) {
-                    $objBgsTickModel = ModelsService::BgsTick();
+                    $objBgsTickModel = model( BgsTickModel::class );
                     $objLastTick = $objBgsTickModel->GetLastTick();
                     $blnIsLoaded = true;
                     $blnStillExpired =
@@ -76,7 +89,7 @@ class BgsTick extends Entity
                 if ( $blnStillExpired ) {
                     $objBgsCatalogue = Services::bgsCatalogue();
                     $objLastTick = $objBgsCatalogue->getLastTick( $objLastTick );
-                    $objBgsTickModel = ModelsService::BgsTick();
+                    $objBgsTickModel = model( BgsTickModel::class );
                     $objBgsTickModel->save( $objLastTick );
                     $blnIsLoaded = true;
                 }
@@ -84,7 +97,7 @@ class BgsTick extends Entity
         }
 
         if ( $blnIsLoaded )
-            $objSession->LastTick = $objLastTick;
+            $objSession->LastBgsTick = $objLastTick;
     }
 
     public function isExpired() {
@@ -92,7 +105,7 @@ class BgsTick extends Entity
         $objAppConfig = config( 'App' );
         $objExpiryInterval = new \DateInterval( 'PT' . $objAppConfig->TickExpiryPeriod . 'S' );
         $objExpiryInterval->invert = 1;
-        $objExpiresOn = ( new \DateTime() )->add( $objExpiryInterval );
+        $objExpiresOn = Time::now()->add( $objExpiryInterval );
         return $this->occuredOn < $objExpiresOn;
     }
 
@@ -101,7 +114,7 @@ class BgsTick extends Entity
         $objAppConfig = config( 'App' );
         $objCheckExpiryInterval = new \DateInterval( 'PT' . $objAppConfig->TickCheckExpiryPeriod. 'S' );
         $objCheckExpiryInterval->invert = 1;
-        $objCheckExpiresOn = ( new \DateTime() )->add( $objCheckExpiryInterval );
+        $objCheckExpiresOn = Time::now()->add( $objCheckExpiryInterval );
         return $this->lastCheckOn < $objCheckExpiresOn;
     }
 }

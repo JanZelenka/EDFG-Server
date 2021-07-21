@@ -1,7 +1,6 @@
 <?php
 namespace App\Entities;
 
-use CodeIgniter\Entity\Entity;
 
 /**
  *
@@ -9,9 +8,17 @@ use CodeIgniter\Entity\Entity;
  *
  * @property int id
  * @property string ebgsId
+ * @property string eddbId
+ * @property string allegiance
+ * @property string government
  * @property string name
+ * @property CodeIgniter\I18n\Time updatedOn
  */
-class MinorFaction extends Entity
+class MinorFaction extends Base\ExternalEntity
 {
+    protected $dates = [
+            'updatedOn'
+    ];
+    public array $arrMinorFactionPresence = array();
 }
 

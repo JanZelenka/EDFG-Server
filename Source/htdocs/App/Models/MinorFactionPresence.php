@@ -15,13 +15,11 @@ class MinorFactionPresence extends Base\StampedModel
     protected $returnType = MinorFactionPresenceEntity::class;
     protected $useSoftDeletes = false;
     protected $allowedFields = [
-            'id'
+            'ebgsSystemId'
+            , 'influence'
             , 'minorFactionId'
             , 'starSystemId'
+            , 'updatedOn'
     ];
-
-    public function function_name($param) {
-        ;
-    }
 }
 
