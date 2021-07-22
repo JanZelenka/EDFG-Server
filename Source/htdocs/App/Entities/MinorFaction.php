@@ -20,5 +20,6 @@ class MinorFaction extends Base\ExternalEntity
             'updatedOn'
     ];
     public array $arrMinorFactionPresence = array();
+
 }
 

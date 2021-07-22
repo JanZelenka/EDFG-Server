@@ -23,8 +23,34 @@ class MinorFaction extends Base\StampedModel
             , 'updatedOn'
     ];
 
-    public function function_name($param) {
-        ;
+    /**
+     *
+     * {@inheritDoc}
+     * @see \CodeIgniter\BaseModel::save()
+     */
+    public function save ( $MinorFaction ):bool {
+        $blnSuccess = parent::save( $MinorFaction );
+
+        if (
+                $blnSuccess
+                 &&
+                ( $MinorFaction instanceof \App\Entities\MinorFaction )
+                 &&
+                /** @var \App\Entities\MinorFaction $MinorFaction */
+                ! empty( $MinorFaction->arrMinorFactionPresence )
+                )
+        {
+            //Saving the Minor Faction Presence data as well.
+            /** @var MinorFaction $objMinorFactionPresenceModel */
+            $objMinorFactionPresenceModel = model( MinorFaction::class );
+            /** @var \App\Entities\MinorFactionPresence $objMinorFactionPresenceEntity */
+            foreach ( $MinorFaction->arrMinorFactionPresence as $objMinorFactionPresenceEntity ) {
+                $objMinorFactionPresenceEntity->minorFactionId = $MinorFaction->id;
+                $objMinorFactionPresenceModel->save( $objMinorFactionPresenceEntity );
+            }
+        }
+
+        return $blnSuccess;
     }
 }
 

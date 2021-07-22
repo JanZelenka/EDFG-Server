@@ -72,27 +72,36 @@ class BgsTick extends Entity
             $blnIsLoaded = false;
         }
 
-        if ( $objLastTick->isExpired() ) {
-            if ( $objLastTick->isCheckExpired() ) {
-                $blnStillExpired = true;
+        /** @var \Config\App $objAppConfig */
+        $objAppConfig = config( 'App' );
+        if (
+                $objLastTick->isExpired( $objAppConfig->TickSafetyExpiry )
+                 ||
+                (
+                    $objLastTick->isExpired( $objAppConfig->TickExpiryPeriod )
+                     &&
+                    $objLastTick->isCheckExpired()
+                    )
+                )
+        {
+            $blnStillExpired = true;
 
-                if ( ! $blnIsLoaded ) {
-                    $objBgsTickModel = model( BgsTickModel::class );
-                    $objLastTick = $objBgsTickModel->GetLastTick();
-                    $blnIsLoaded = true;
-                    $blnStillExpired =
-                        $objLastTick->isExpired()
-                         &&
-                        $objLastTick->isCheckExpired();
-                }
+            if ( ! $blnIsLoaded ) {
+                $objBgsTickModel = model( BgsTickModel::class );
+                $objLastTick = $objBgsTickModel->GetLastTick();
+                $blnIsLoaded = true;
+                $blnStillExpired =
+                    $objLastTick->isExpired()
+                     &&
+                    $objLastTick->isCheckExpired();
+            }
 
-                if ( $blnStillExpired ) {
-                    $objBgsCatalogue = Services::bgsCatalogue();
-                    $objLastTick = $objBgsCatalogue->getLastTick( $objLastTick );
-                    $objBgsTickModel = model( BgsTickModel::class );
-                    $objBgsTickModel->save( $objLastTick );
-                    $blnIsLoaded = true;
-                }
+            if ( $blnStillExpired ) {
+                $objBgsCatalogue = Services::bgsCatalogue();
+                $objLastTick = $objBgsCatalogue->getLastTick( $objLastTick );
+                $objBgsTickModel = model( BgsTickModel::class );
+                $objBgsTickModel->save( $objLastTick );
+                $blnIsLoaded = true;
             }
         }
 
@@ -100,10 +109,8 @@ class BgsTick extends Entity
             $objSession->LastBgsTick = $objLastTick;
     }
 
-    public function isExpired() {
-        /** @var \Config\App $objAppConfig */
-        $objAppConfig = config( 'App' );
-        $objExpiryInterval = new \DateInterval( 'PT' . $objAppConfig->TickExpiryPeriod . 'S' );
+    public function isExpired( int $intExpiryPeriod ) {
+        $objExpiryInterval = new \DateInterval( 'PT' . $intExpiryPeriod . 'S' );
         $objExpiryInterval->invert = 1;
         $objExpiresOn = Time::now()->add( $objExpiryInterval );
         return $this->occuredOn < $objExpiresOn;

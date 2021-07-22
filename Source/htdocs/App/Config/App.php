@@ -486,14 +486,20 @@ class App extends BaseConfig
 	public $StarSystemCatalogue = \App\Libraries\StarSystemCatalogue\EliteBGS::class;
 	/**
 	 * Number of seconds
-	 * Determins for how long since the last retrieved tick there will be no attempts to loads a new Tick from
-	 * an external service.
+	 * Defines for how long the stored Tick data is considered most recent even without a call to the BGS service.
 	 */
 	public int $TickExpiryPeriod = 43200;
 
 	/**
 	 * Number of seconds
-	 * Determins for how long since the last attempt there will be no attempts to retrieve a new Tick.
+	 * Defines the period between calls to the BGS service in case the Tick is already considered expired but is stil in the Safety period.
 	 */
 	public int $TickCheckExpiryPeriod = 3600;
+
+	/**
+	 * Number of seconds
+	 * Defines a period after which the tick check is no longer considerate and every tick query will reach out for the BGS service to get the most recent data.
+	 * @var integer
+	 */
+	public int $TickSafetyExpiry = 86400;
 }
