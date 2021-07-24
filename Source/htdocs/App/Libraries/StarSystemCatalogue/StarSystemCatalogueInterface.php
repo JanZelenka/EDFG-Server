@@ -14,5 +14,5 @@ interface StarSystemCatalogueInterface
      * @return StarSystem[]
      * @param array $arrParams
      */
-    public function getStarSystems ( array $arrParams ) : array;
+    public function getStarSystem ( StarSystem $objStarSystem ) : bool;
 }

@@ -470,31 +470,38 @@ class App extends BaseConfig
 	/**
 	 * Defines the BGS Catalogue implementation to be used when retrieving
 	 * generic BGS data.
+	 * @var string
 	 */
 	public $BgsCatalogue = \App\Libraries\BgsCatalogue\EliteBGS::class;
 
 	/**
 	 * Defines the Mimor Faction Catalogue implementation to be used when
-	 * retrieving minor faction data.
+	 * retrieving minor faction data from external service.
+	 * @var string
 	 */
 	public $MinorFactionCatalogue = \App\Libraries\MinorFactionCatalogue\EliteBGS::class;
 
 	/**
 	 * Defines the Star System Catalogue implementation to be used when
-	 * retrieving star system data.
+	 * retrieving star system data from external service.
+	 * @var string
 	 */
 	public $StarSystemCatalogue = \App\Libraries\StarSystemCatalogue\EliteBGS::class;
 	/**
 	 * Number of seconds
 	 * Defines for how long the stored Tick data is considered most recent even without a call to the BGS service.
+	 * There will be no attempt to call the BGS service to retrieve a new Tick within this period since the last successful call.
+	 * When this period expires, BGS service will be called with the frequence defined in ExternalCheckExpiryPeriod.
+	 * @var integer
 	 */
 	public int $TickExpiryPeriod = 43200;
 
 	/**
 	 * Number of seconds
-	 * Defines the period between calls to the BGS service in case the Tick is already considered expired but is stil in the Safety period.
+	 * Defines the period between calls to the external services in case the Tick is already considered expired but is stil in the Safety period.
+	 * @var integer
 	 */
-	public int $TickCheckExpiryPeriod = 3600;
+	public int $ExternalCheckExpiryPeriod = 3600;
 
 	/**
 	 * Number of seconds

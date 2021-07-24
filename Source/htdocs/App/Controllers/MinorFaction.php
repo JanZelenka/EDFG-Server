@@ -8,17 +8,23 @@ use App\Models\MinorFaction as MinorFactionModel;
 class MinorFaction extends Base\TickSensitive
 {
     public function index ( string $minor_faction_id = null ) {
-        /** @var \Config\App $objAppConfig */
+        /**
+         * @var \Config\App $objAppConfig
+         * @var \App\Entities\MinorFaction $objMinorFactionEntity
+         */
         $objAppConfig = config( 'App' );
-        $objMinorFactionEntity = new MinorFactionEntity();
-        $objMinorFactionEntity->name = $minor_faction_id;
-        /** @var \App\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface $objMinorFactionCatalogue */
-        $objMinorFactionCatalogue = new $objAppConfig->MinorFactionCatalogue;
-        $objMinorFactionCatalogue->getMinorFaction( $objMinorFactionEntity );
-        $objMinorFactionCatalogue->getMinorFactionPresence( $objMinorFactionEntity );
-        /** @var MinorFactionModel $objMinorFactionModel */
-        $objMinorFactionModel = model( MinorFactionModel::class );
-        $objMinorFactionModel->save( $objMinorFactionEntity );
+        $objMinorFactionEntity = model( MinorFactionModel::class )
+            ->where(
+                    'name'
+                    , $minor_faction_id
+                    )
+            ->first();
+
+        if ( is_null( $objMinorFactionEntity ) ) {
+            $objMinorFactionEntity = new MinorFactionEntity( ['name' => $minor_faction_id] );
+        }
+
+        $objMinorFactionEntity->synchronize();
         return view('welcome_message');
     }
 

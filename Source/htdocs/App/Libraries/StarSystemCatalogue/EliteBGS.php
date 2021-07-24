@@ -3,19 +3,23 @@ namespace App\Libraries\StarSystemCatalogue;
 
 use Config\Services;
 use App\Entities\StarSystem;
+use App\Libraries\EliteBGS as EliteBGSBase;
+use CodeIgniter\I18n\Time;
 /**
  *
  * @author Jan Zelenka <jan.zelenka@telenet.be>
  *
  */
-class EliteBGS implements StarSystemCatalogueInterface
+class EliteBGS
+    extends EliteBGSBase
+    implements StarSystemCatalogueInterface
 {
     /**
      * (non-PHPdoc)
      *
      * @see \App\Libraries\StarSystemCatalogue\StarSystemCatalogueInterface::getStarSystems()
      */
-    public function getStarSystems ( array $arrParams )
+    public function getStarSystem ( StarSystem $objStarSystem ): bool
     {
         /**
          * @var \CodeIgniter\HTTP\CURLRequest $objClient
@@ -24,12 +28,27 @@ class EliteBGS implements StarSystemCatalogueInterface
          * @var \Config\EliteBGS $objConfig
          */
 
-        if ( isset( $arrParams[ 'id' ] ) )
-            $strUrlParams = 'id=' . urlencode( $arrParams[ 'id' ] );
-        elseif ( isset( $arrParams[ 'name' ] ) )
-            $strUrlParams = 'name=' . urlencode( $arrParams[ 'name' ] );
-        else
+        $strEbgsId = $objStarSystem->ebgsId;
+
+        if ( ! empty( $strEbgsId ) ) {
+            $strUrlParams = 'id=' . urlencode( $strEbgsId );
+        } else {
+            $strName = $objStarSystem->name;
+
+            if ( ! empty( $strName ) ) {
+                $strUrlParams = 'name=' . urlencode( $strName );
+            } else {
+                $intEddbId = $objStarSystem->eddbId;
+
+                if ( ! empty( $intEddbId ) ) {
+                    $strUrlParams = 'eddbId=' . urlencode( $strName );
+                }
+            }
+        }
+
+        if ( ! isset ( $strUrlParams ) ) {
             throw new \Exception( 'No recognized parameter specified.' );
+        }
 
         $objConfig = config( 'EliteBGS');
         $objClient = Services::curlrequest();
@@ -37,23 +56,23 @@ class EliteBGS implements StarSystemCatalogueInterface
                 'GET'
                 , $objConfig->strUrlRoot . 'systems?' . $strUrlParams
                 );
-        $arrResult = array();
 
         if ($objResponse->getStatusCode() < 300 ) {
-            $objResponseBody = json_decode( $objResponse->getBody() );
-
-            foreach ( $objResponseBody->docs as $objSourceStarSystem ) {
-                $objStarSystem = new StarSystem();
-                $objStarSystem->id = $objSourceStarSystem->eddb_id;
-                $objStarSystem->name = $objSourceStarSystem->name;
-                $objStarSystem->coordX = $objSourceStarSystem->x;
-                $objStarSystem->coordY = $objSourceStarSystem->y;
-                $objStarSystem->coordZ = $objSourceStarSystem->z;
-                $arrResult[] = $objStarSystem;
-            };
+            $objStarSystemData = json_decode( $objResponse->getBody() )->docs[0];
+            $objStarSystem->id = $objStarSystemData->eddb_id;
+            $objStarSystem->name = $objStarSystemData->name;
+            $objStarSystem->coordX = $objStarSystemData->x;
+            $objStarSystem->coordY = $objStarSystemData->y;
+            $objStarSystem->coordZ = $objStarSystemData->z;
+            $objStarSystem->ebgsId = $objStarSystemData->_id;
+            $objStarSystem->eddbId = $objStarSystemData->eddb_id;
+            $objStarSystem->updatedOn = $this->getTime( $objStarSystemData->updated_at );
+            $objStarSystem->lastCheckOn = Time::now();
+        } else {
+            return false;
         }
 
-        return $arrResult;
+        return true;
     }
 }
 

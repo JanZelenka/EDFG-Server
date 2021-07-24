@@ -4,6 +4,7 @@ namespace App\Libraries\MinorFactionCatalogue;
 use Config\Services;
 use App\Entities\MinorFaction;
 use App\Entities\MinorFactionPresence;
+use App\Libraries\EliteBGS as EliteBGSBase;
 use CodeIgniter\I18n\Time;
 
 /**
@@ -11,7 +12,9 @@ use CodeIgniter\I18n\Time;
  * @author Jan Zelenka <jan.zelenka@clickworks.eu>
  *
  */
-class EliteBGS implements MinorFactionCatalogueInterface
+class EliteBGS
+    extends EliteBGSBase
+    implements MinorFactionCatalogueInterface
 {
     protected $arrMinorFactionData = array();
 
@@ -35,11 +38,7 @@ class EliteBGS implements MinorFactionCatalogueInterface
         $objMinorFaction->allegiance = $objData->allegiance;
         $objMinorFaction->government = $objData->government;
         $objMinorFaction->name = $objData->name;
-        $objMinorFaction->updatedOn = Time::createFromFormat(
-                $objConfig->strTimeFormat
-                , $objData->updated_at
-                , $objConfig->strTimeZone
-                );
+        $objMinorFaction->updatedOn = $this->getTime( $objData->updated_at );
         return true;
     }
 
@@ -87,24 +86,17 @@ class EliteBGS implements MinorFactionCatalogueInterface
             return false;
         }
 
-        /** @var \Config\EliteBGS $objConfig */
-        $objConfig = config( 'EliteBGS');
-
         foreach ($objData->faction_presence as $objPresenceData ) {
-            $objMinorFactionPresence = $objMinorFaction->arrMinorFactionPresence[ $objPresenceData->{MinorFactionPresence::$strExternalIdRef} ] ?? null;
+            $objMinorFactionPresence = $objMinorFaction->MinorFactionPresence[ $objPresenceData->{MinorFactionPresence::$externalIdDataKey} ] ?? null;
 
             if ( is_null( $objMinorFactionPresence ) ) {
                 $objMinorFactionPresence = new MinorFactionPresence();
-                $objMinorFaction->arrMinorFactionPresence[ $objPresenceData->{MinorFactionPresence::$strExternalIdRef} ] = $objMinorFactionPresence;
+                $objMinorFaction->MinorFactionPresence[ $objPresenceData->{MinorFactionPresence::$externalIdDataKey} ] = $objMinorFactionPresence;
             }
 
             $objMinorFactionPresence->ebgsSystemId = $objPresenceData->system_id;
             $objMinorFactionPresence->influence = $objPresenceData->influence;
-            $objMinorFactionPresence->updatedOn = Time::createFromFormat(
-                    $objConfig->strTimeFormat
-                    , $objData->updated_at
-                    , $objConfig->strTimeZone
-                    );
+            $objMinorFactionPresence->updatedOn = $this->getTime( $objData->updated_at );
         }
 
         return true;
@@ -142,18 +134,6 @@ class EliteBGS implements MinorFactionCatalogueInterface
         }
 
         return $objData;
-                    /*
-                     $objMinorFaction = new MinorFactionEntity();
-                     $objMinorFactionData = $objResponse->getBody()->docs[0];
-                     $objMinorFaction->name = $objMinorFactionData->name;
-                     $objMinorFaction->ebgsId = $objMinorFactionData->{'_id'};
-                     $this->arrMinorFactions[ $objMinorFaction->name ] = $objMinorFaction;
-
-                     foreach ( $objMinorFactionData->faction_presence as $objPresenceData ) {
-                     $objMinorFactionPresence = new MinorFactionPresenceEntity();
-                     $objMinorFactionPresence->minorFactionId = $this->intMinorFactionId;
-                     }
-                     */
     }
 }
 

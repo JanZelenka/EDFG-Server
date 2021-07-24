@@ -63,9 +63,9 @@ class Services extends BaseService
 	 * @param boolean $blnGetShared
 	 * @return \App\Libraries\StarSystemCatalogue\StarSystemCatalogueInterface
 	 */
-    public static function starCatalogue ( $blnGetShared = true ): StarSystemCatalogue\StarSystemCatalogueInterface {
+    public static function starSystemCatalogue ( $blnGetShared = true ): StarSystemCatalogue\StarSystemCatalogueInterface {
         if ( $blnGetShared )
-            return static::getSharedInstance( 'starCatalogue' );
+            return static::getSharedInstance( 'starSystemCatalogue' );
 
         /** @var \Config\App $objAppConfig */
         $objAppConfig = config( 'App' );

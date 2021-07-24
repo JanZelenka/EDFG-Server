@@ -2,6 +2,7 @@
 namespace App\Libraries\StarSystemCatalogue;
 
 use Config\Services;
+use App\Entities\StarSystem;
 
 /**
  *
@@ -10,53 +11,42 @@ use Config\Services;
  */
 class EDStarMap implements StarSystemCatalogueInterface
 {
-    protected $strUrlRoot = 'https://www.edsm.net/api-v1/';
     /**
      * (non-PHPdoc)
      *
      * @see \App\Libraries\StarSystemCatalogue\StarSystemCatalogueInterface::getStarSystems()
      */
-    public function getStarSystems ( array $arrParams )
+    public function getStarSystem ( StarSystem $objStarSystem )
     {
+        /** @var \Config\EDStarMap $objConfig */
         /** @var \CodeIgniter\HTTP\CURLRequest $objClient */
         /** @var \CodeIgniter\HTTP\Response $objResponse */
-        /** @var \App\Entities\StarSystem $objStarSystem */
 
-        if ( isset( $arrParams[ 'name' ] ) )
-            $systemName = $arrParams[ 'name' ];
-        else
+        $strName = $objStarSystem->name;
+
+        if ( empty( $strName ) )
             throw new \Exception( 'Parameter \'name\' is missing.' );
 
-        $strURLParams = '?showCoordinates=1' . urlencode( (
-                is_array( $systemName )
-                ? 'systemName[]=' . implode(
-                        "&systemName[]="
-                        , $systemName
-                        )
-                : "systemName=$systemName"
-                ) );
+        $strURLParams = '?showCoordinates=1&systemName' . urlencode( $strName );
 
+        $objConfig = config( 'EDStarMap');
         $objClient = Services::curlrequest();
         $objResponse = $objClient->request(
                 'GET'
-                , $this->strBaseURL . 'systems' . $strURLParams
+                , $objConfig->strBaseURL . 'systems' . $strURLParams
                 );
-        $arrResult = array();
 
         if ($objResponse->getStatusCode() < 300 ) {
-            $objResponseBody = json_decode( $objResponse->getBody() );
-
-            foreach ( $objResponseBody->docs as $objEDSMStarSystem ) {
-                $objStarSystem = new \App\Entities\StarSystem();
-                $objStarSystem->name = $objEDSMStarSystem->name;
-                $objStarSystem->coordX = $objEDSMStarSystem->x;
-                $objStarSystem->coordY = $objEDSMStarSystem->y;
-                $objStarSystem->coordZ = $objEDSMStarSystem->z;
-                $arrResult[] = $objStarSystem;
-            };
+            $objStarSystemData = json_decode( $objResponse->getBody() );
+            $objStarSystem->name = $objStarSystemData->name;
+            $objStarSystem->coordX = $objStarSystemData->coords->x;
+            $objStarSystem->coordY = $objStarSystemData->coords->y;
+            $objStarSystem->coordZ = $objStarSystemData->coords->z;
+        } else {
+            return false;
         }
 
-        return $arrResult;
+        return true;
     }
 }
 

@@ -2,17 +2,16 @@
 
 namespace App\Models\Base;
 
-use CodeIgniter\Model;
+use Config\Services;
 use CodeIgniter\Database\ConnectionInterface;
 use CodeIgniter\Validation\ValidationInterface;
-use Config\Services;
 
 /**
  *
  * @author Jan Zelenka <jan.zelenka@telenet.be>
  *
  */
-class StampedModel extends Model {
+class StampedModel extends BaseModel {
     /**
      *
      */

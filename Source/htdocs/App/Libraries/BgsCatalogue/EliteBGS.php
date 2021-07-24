@@ -3,13 +3,17 @@ namespace App\Libraries\BgsCatalogue;
 
 use Config\Services;
 use App\Entities\BgsTick;
+use App\Libraries\EliteBGS as EliteBGSBase;
 use CodeIgniter\I18n\Time;
+use App;
 /**
  *
  * @author Jan Zelenka <jan.zelenka@clickworks.eu>
  *
  */
-class EliteBGS implements BgsCatalogueInterface
+class EliteBGS
+    extends EliteBGSBase
+    implements BgsCatalogueInterface
 {
 
     /**
@@ -30,11 +34,7 @@ class EliteBGS implements BgsCatalogueInterface
             $objResponseBody = json_decode( $objResponse->getBody());
 
             if ( $objResponseBody[0]->_id !== $objBgsTick->ebgsId ) {
-                $objOccuredOn = Time::createFromFormat(
-                        $objConfig->strTimeFormat
-                        , $objResponseBody[0]->time
-                        , $objConfig->strTimeZone
-                        );
+                $objOccuredOn = $this->getTime( $objResponseBody[0]->time );
                 $objBgsTick = new BgsTick(
                         $objResponseBody[0]->_id
                         , $objOccuredOn

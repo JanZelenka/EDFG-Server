@@ -9,7 +9,7 @@ use CodeIgniter\Entity\Entity;
  */
 class ExternalEntity extends Entity
 {
-    public static string $strExternalIdColumn = 'ebgsId';
-    public static string $strExternalIdRef = '_id';
+    public static string $externalIdColumn = 'ebgsId';
+    public static string $externalIdDataKey = '_id';
 }
 

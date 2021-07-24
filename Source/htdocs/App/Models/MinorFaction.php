@@ -29,6 +29,8 @@ class MinorFaction extends Base\StampedModel
      * @see \CodeIgniter\BaseModel::save()
      */
     public function save ( $MinorFaction ):bool {
+        /** @var \App\Entities\MinorFaction $MinorFaction */
+
         $blnSuccess = parent::save( $MinorFaction );
 
         if (
@@ -36,15 +38,14 @@ class MinorFaction extends Base\StampedModel
                  &&
                 ( $MinorFaction instanceof \App\Entities\MinorFaction )
                  &&
-                /** @var \App\Entities\MinorFaction $MinorFaction */
-                ! empty( $MinorFaction->arrMinorFactionPresence )
+                ! empty( $MinorFaction->MinorFactionPresence )
                 )
         {
             //Saving the Minor Faction Presence data as well.
             /** @var MinorFaction $objMinorFactionPresenceModel */
             $objMinorFactionPresenceModel = model( MinorFaction::class );
             /** @var \App\Entities\MinorFactionPresence $objMinorFactionPresenceEntity */
-            foreach ( $MinorFaction->arrMinorFactionPresence as $objMinorFactionPresenceEntity ) {
+            foreach ( $MinorFaction->MinorFactionPresence as $objMinorFactionPresenceEntity ) {
                 $objMinorFactionPresenceEntity->minorFactionId = $MinorFaction->id;
                 $objMinorFactionPresenceModel->save( $objMinorFactionPresenceEntity );
             }
