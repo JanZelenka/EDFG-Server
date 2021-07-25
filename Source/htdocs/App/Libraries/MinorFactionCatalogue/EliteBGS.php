@@ -2,8 +2,8 @@
 namespace App\Libraries\MinorFactionCatalogue;
 
 use Config\Services;
-use App\Entities\MinorFaction;
-use App\Entities\MinorFactionPresence;
+use App\Entities\MinorFaction as Entity;
+use App\Entities\MinorFactionPresence as PresenceEntity;
 use App\Libraries\EliteBGS as EliteBGSBase;
 use CodeIgniter\I18n\Time;
 
@@ -16,15 +16,15 @@ class EliteBGS
     extends EliteBGSBase
     implements MinorFactionCatalogueInterface
 {
-    protected $arrMinorFactionData = array();
+    protected $arrData = array();
 
     /**
      * (non-PHPdoc)
      *
      * @see \App\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface::getMinorFaction()
      */
-    public function getMinorFaction ( MinorFaction $objMinorFaction ): bool    {
-        $objData = $this->getMinorFactionData( $objMinorFaction );
+    public function getMinorFaction ( Entity $objEntity ): bool    {
+        $objData = $this->getData( $objEntity );
 
         if ( is_null( $objData ) ) {
             return false;
@@ -33,36 +33,37 @@ class EliteBGS
         /** @var \Config\EliteBGS $objConfig */
         $objConfig = config( 'EliteBGS');
 
-        $objMinorFaction->ebgsId = $objData->_id;
-        $objMinorFaction->eddbId = $objData->eddb_id;
-        $objMinorFaction->allegiance = $objData->allegiance;
-        $objMinorFaction->government = $objData->government;
-        $objMinorFaction->name = $objData->name;
-        $objMinorFaction->updatedOn = $this->getTime( $objData->updated_at );
+        $objEntity->ebgsId = $objData->_id;
+        $objEntity->eddbId = $objData->eddb_id;
+        $objEntity->allegiance = $objData->allegiance;
+        $objEntity->government = $objData->government;
+        $objEntity->lastCheckOn = Time::now();
+        $objEntity->name = $objData->name;
+        $objEntity->updatedOn = $this->getTime( $objData->updated_at );
         return true;
     }
 
     /**
      * Returns the JSON object as received from the EliteBGS Factions endpoint.
-     * @param MinorFaction $objMinorFaction
+     * @param Entity $objEntity
      * @throws \Exception
      * @return object|NULL
      */
-    protected function getMinorFactionData ( MinorFaction $objMinorFaction ): ?object {
-        $objData = $this->arrMinorFactionData[ $objMinorFaction->ebgsId ] ?? null;
+    protected function getData ( Entity $objEntity ): ?object {
+        $objData = $this->arrData[ $objEntity->ebgsId ] ?? null;
 
         if ( ! is_null( $objData ) ) {
             return $objData;
         }
 
-        $strEbgsId = $objMinorFaction->ebgsId;
+        $strEbgsId = $objEntity->ebgsId;
 
         if ( empty ( $strEbgsId ) ) {
             //When the EliteBGS id is not known, we know it hasn't been fetched yet and the caal to API is always made.
-            $strName = $objMinorFaction->name;
+            $strName = $objEntity->name;
 
             if ( empty( $strName ) ) {
-                $intEddbId = $objMinorFaction->eddbId;
+                $intEddbId = $objEntity->eddbId;
 
                 if ( empty( $intEddbId ) ) {
                     throw new \Exception( 'The MinorFaction object contains no values recognized as parameters by EliteBGS.' );
@@ -79,24 +80,24 @@ class EliteBGS
         return $this->loadMinorFaction( $strLookupParams);
     }
 
-    public function getMinorFactionPresence ( MinorFaction $objMinorFaction ): bool {
-        $objData = $this->getMinorFactionData( $objMinorFaction );
+    public function getPresence ( Entity $objEntity ): bool {
+        $objData = $this->getData( $objEntity );
 
         if ( is_null( $objData ) ) {
             return false;
         }
 
         foreach ($objData->faction_presence as $objPresenceData ) {
-            $objMinorFactionPresence = $objMinorFaction->MinorFactionPresence[ $objPresenceData->{MinorFactionPresence::$externalIdDataKey} ] ?? null;
+            $objPresence = $objEntity->MinorFactionPresence[ $objPresenceData->{PresenceEntity::$externalIdDataKey} ] ?? null;
 
-            if ( is_null( $objMinorFactionPresence ) ) {
-                $objMinorFactionPresence = new MinorFactionPresence();
-                $objMinorFaction->MinorFactionPresence[ $objPresenceData->{MinorFactionPresence::$externalIdDataKey} ] = $objMinorFactionPresence;
+            if ( is_null( $objPresence ) ) {
+                $objPresence = new PresenceEntity();
+                $objEntity->MinorFactionPresence[ $objPresenceData->{PresenceEntity::$externalIdDataKey} ] = $objPresence;
             }
 
-            $objMinorFactionPresence->ebgsSystemId = $objPresenceData->system_id;
-            $objMinorFactionPresence->influence = $objPresenceData->influence;
-            $objMinorFactionPresence->updatedOn = $this->getTime( $objData->updated_at );
+            $objPresence->ebgsSystemId = $objPresenceData->system_id;
+            $objPresence->influence = $objPresenceData->influence;
+            $objPresence->updatedOn = $this->getTime( $objData->updated_at );
         }
 
         return true;
@@ -111,7 +112,7 @@ class EliteBGS
         /**
          * @var \CodeIgniter\HTTP\CURLRequest $objClient
          * @var \CodeIgniter\HTTP\Response $objResponse
-         * @var \App\Entities\MinorFactionPresence $objMinorFactionPresence
+         * @var \App\Entities\MinorFactionPresence $objEntityPresence
          */
 
         $objConfig = config( 'EliteBGS');
@@ -123,17 +124,14 @@ class EliteBGS
 
         if ( $objResponse->getStatusCode() < 300 ) {
             $objResponseBody = json_decode( $objResponse->getBody() );
-            $blnSuccess = $objResponseBody->total;
 
-            if ( $blnSuccess ) {
+            if ( $objResponseBody->total ) {
                 $objData = $objResponseBody->docs[0];
                 $this->arrMinorFactionData[ $objData->_id ] = $objData;
             }
-        } else {
-            $objData = null;
         }
 
-        return $objData;
+        return $objData ?? null;
     }
 }
 

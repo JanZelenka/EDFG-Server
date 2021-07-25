@@ -1,8 +1,7 @@
 <?php
 namespace App\Models;
 
-use App\Entities\MinorFactionPresence as MinorFactionPresenceEntity;
-use App\Entities\StarSystem as StarSystemEntity;
+use App\Entities\MinorFactionPresence as Entity;
 
 /**
  *
@@ -13,7 +12,7 @@ class MinorFactionPresence extends Base\StampedModel
 {
     protected $table = 'minor_faction_presence';
     protected $primaryKey = 'id';
-    protected $returnType = MinorFactionPresenceEntity::class;
+    protected $returnType = Entity::class;
     protected $useSoftDeletes = false;
     protected $allowedFields = [
             'ebgsSystemId'
@@ -23,7 +22,7 @@ class MinorFactionPresence extends Base\StampedModel
             , 'updatedOn'
     ];
 
-    public function findMinorFaction ( int $intMinorFactionId ): array {
+    public function findMinorFaction ( int $intMinorFactionId ): ?array {
         /** @var \CodeIgniter\Database\ResultInterface $objResult */
         $objResult = $this->db
             ->table( 'minor_faction_presence_view' )
@@ -33,29 +32,68 @@ class MinorFactionPresence extends Base\StampedModel
                     )
             ->get();
 
-        $arrMinorFactionPresence = array();
+        $arrPresence = array();
 
-        foreach ( $objResult->getResult() as $objMinorFactionPresenceData ) {
-            $objMinorFactionPresenceEntity = new MinorFactionPresenceEntity();
-            $objMinorFactionPresenceEntity->id = $arrMinorFactionPresenceData->id;
+        foreach ( $objResult->getResult() as $objData ) {
+            $objEntity = new Entity();
+            $objEntity->id = $objData->id;
 
             foreach ( $this->allowedFields as $strFieldName ) {
-                $objMinorFactionPresenceEntity->{$strFieldName} = $objMinorFactionPresenceItem->{$strFieldName};
+                $objEntity->{$strFieldName} = $objData->{$strFieldName};
             }
 
             $strColumnNamePrefix = 'starSystem_';
 
-            if ( isset( $objMinorFactionPresenceData->{$strColumnNamePrefix . 'id'} ) ) {
-                $objMinorFactionPresenceEntity->StarSystem = model( StarSystem::class )->newFromViewResult(
+            if ( isset( $objData->{$strColumnNamePrefix . 'id'} ) ) {
+                $objEntity->StarSystem = model( StarSystem::class )->newFromViewResult(
                         $strColumnNamePrefix
-                        , $objMinorFactionPresenceData
+                        , $objData
                         );
             }
 
-            $arrMinorFactionPresence[ $objMinorFactionPresenceEntity->{MinorFactionPresenceEntity::externalIdColumn} ] = $objMinorFactionPresenceEntity;
+            $arrPresence[ $objEntity->{Entity::$externalIdColumn} ] = $objEntity;
         }
 
-        return $arrMinorFactionPresence;
+        return (
+                empty( $arrPresence )
+                ? null
+                : $arrPresence
+                );
+    }
+
+    public function findStarSystem ( int $intStarSystemId ): ?array {
+        /** @var \CodeIgniter\Database\ResultInterface $objResult */
+
+        $arrResult = $this
+            ->where(
+                    'starSystemId'
+                    , $intStarSystemId
+                    )
+            ->findAll();
+
+        $arrPresence = array();
+
+        /** @var \App\Entities\MinorFactionPresence $objPresenceEntity */
+        foreach ( $arrResult as $objPresenceEntity ) {
+            $arrPresence[ $objPresenceEntity->minorFactionId ] = $objPresenceEntity;
+        }
+
+        return (
+                empty( $arrPresence )
+                ? null
+                : $arrPresence
+                );
+    }
+
+    public function save( $MinorFactionPresence ): bool {
+        if ( $MinorFactionPresence instanceof Entity ) {
+            /** @var \App\Entities\MinorFactionPresence $MinorFactionPresence */
+            if ( ! is_null( $MinorFactionPresence->StarSystem ) ) {
+                $MinorFactionPresence->starSystemId = $MinorFactionPresence->StarSystem->id;
+            }
+        }
+
+        return parent::save( $MinorFactionPresence );
     }
 }
 

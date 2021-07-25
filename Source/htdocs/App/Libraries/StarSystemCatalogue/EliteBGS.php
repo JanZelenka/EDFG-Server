@@ -2,7 +2,7 @@
 namespace App\Libraries\StarSystemCatalogue;
 
 use Config\Services;
-use App\Entities\StarSystem;
+use App\Entities\StarSystem as Entity;
 use App\Libraries\EliteBGS as EliteBGSBase;
 use CodeIgniter\I18n\Time;
 /**
@@ -19,26 +19,26 @@ class EliteBGS
      *
      * @see \App\Libraries\StarSystemCatalogue\StarSystemCatalogueInterface::getStarSystems()
      */
-    public function getStarSystem ( StarSystem $objStarSystem ): bool
+    public function getStarSystem ( Entity $objEntity ): bool
     {
         /**
          * @var \CodeIgniter\HTTP\CURLRequest $objClient
          * @var \CodeIgniter\HTTP\Response $objResponse
-         * @var \App\Entities\StarSystem $objStarSystem
+         * @var \App\Entities\StarSystem $objEntity
          * @var \Config\EliteBGS $objConfig
          */
 
-        $strEbgsId = $objStarSystem->ebgsId;
+        $strEbgsId = $objEntity->ebgsId;
 
         if ( ! empty( $strEbgsId ) ) {
             $strUrlParams = 'id=' . urlencode( $strEbgsId );
         } else {
-            $strName = $objStarSystem->name;
+            $strName = $objEntity->name;
 
             if ( ! empty( $strName ) ) {
                 $strUrlParams = 'name=' . urlencode( $strName );
             } else {
-                $intEddbId = $objStarSystem->eddbId;
+                $intEddbId = $objEntity->eddbId;
 
                 if ( ! empty( $intEddbId ) ) {
                     $strUrlParams = 'eddbId=' . urlencode( $strName );
@@ -58,16 +58,15 @@ class EliteBGS
                 );
 
         if ($objResponse->getStatusCode() < 300 ) {
-            $objStarSystemData = json_decode( $objResponse->getBody() )->docs[0];
-            $objStarSystem->id = $objStarSystemData->eddb_id;
-            $objStarSystem->name = $objStarSystemData->name;
-            $objStarSystem->coordX = $objStarSystemData->x;
-            $objStarSystem->coordY = $objStarSystemData->y;
-            $objStarSystem->coordZ = $objStarSystemData->z;
-            $objStarSystem->ebgsId = $objStarSystemData->_id;
-            $objStarSystem->eddbId = $objStarSystemData->eddb_id;
-            $objStarSystem->updatedOn = $this->getTime( $objStarSystemData->updated_at );
-            $objStarSystem->lastCheckOn = Time::now();
+            $objEntityData = json_decode( $objResponse->getBody() )->docs[0];
+            $objEntity->name = $objEntityData->name;
+            $objEntity->coordX = $objEntityData->x;
+            $objEntity->coordY = $objEntityData->y;
+            $objEntity->coordZ = $objEntityData->z;
+            $objEntity->ebgsId = $objEntityData->_id;
+            $objEntity->eddbId = $objEntityData->eddb_id;
+            $objEntity->updatedOn = $this->getTime( $objEntityData->updated_at );
+            $objEntity->lastCheckOn = Time::now();
         } else {
             return false;
         }

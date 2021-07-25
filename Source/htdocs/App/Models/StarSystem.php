@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Entities\StarSystem as StarSystemEntity;
+use App\Entities\StarSystem as Entity;
 
 /**
  *
@@ -12,7 +12,7 @@ use App\Entities\StarSystem as StarSystemEntity;
 class StarSystem extends Base\StampedModel {
     protected $table = 'star_system';
     protected $primaryKey = 'id';
-    protected $returnType = StarSystemEntity::class;
+    protected $returnType = Entity::class;
     protected $useSoftDeletes = false;
     protected $allowedFields = [
             'coordX'
@@ -31,18 +31,21 @@ class StarSystem extends Base\StampedModel {
      *
      * @param string $strColumnNamePrefix
      * @param object $objViewRow
-     * @return StarSystemEntity
+     * @return Entity
      */
     public function newFromViewResult (
             string $strColumnNamePrefix
             , object $objViewRow
-            ): StarSystemEntity
+            ): Entity
     {
         $objStarSystem = new $this->returnType();
+        $objStarSystem->id = $objViewRow->{$strColumnNamePrefix . 'id'};
 
         foreach ($this->allowedFields as $strFieldName) {
-            $strFieldName = $strColumnNamePrefix . $strFieldName;
-            $objStarSystem->{$strFieldName} = $objViewRow->{$strFieldName};
+            $strViewFieldName = $strColumnNamePrefix . $strFieldName;
+            $objStarSystem->{$strFieldName} = $objViewRow->{$strViewFieldName};
         }
+
+        return $objStarSystem;
     }
 }

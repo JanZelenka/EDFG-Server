@@ -1,5 +1,6 @@
 <?php
 namespace App\Models\Base;
+
 use CodeIgniter\Model;
 use CodeIgniter\Entity\Entity;
 
@@ -10,6 +11,31 @@ use CodeIgniter\Entity\Entity;
  */
 class BaseModel extends Model
 {
+    public function findEntity (
+            $key
+            , $value = null
+            ): ?Entity
+    {
+        if ( empty( $this->returnType ) ) {
+            return null;
+        }
+
+        if (! is_array($key))
+        {
+            $key = [$key => $value];
+        }
+
+        $objEntity = $this
+        ->where( $key )
+        ->first();
+
+        if ( is_null( $objEntity ) ) {
+            $objEntity = new $this->returnType( $key );
+        }
+
+        return $objEntity;
+    }
+
     public function save($data): bool {
         if (empty($data))
         {

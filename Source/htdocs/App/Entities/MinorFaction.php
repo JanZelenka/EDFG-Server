@@ -3,9 +3,10 @@ namespace App\Entities;
 
 
 use Config\Services;
-use App\Models\MinorFaction as MinorFactionModel;
-use App\Models\MinorFactionPresence as MinorFactionPresenceModel;
+use App\Models\MinorFaction as Model;
+use App\Models\MinorFactionPresence as PresenceModel;
 use App\Models\StarSystem as StarSystemModel;
+use CodeIgniter\I18n\Time;
 
 /**
  *
@@ -16,6 +17,7 @@ use App\Models\StarSystem as StarSystemModel;
  * @property string eddbId
  * @property string allegiance
  * @property string government
+ * @property CodeIgniter\I18n\Time lastCheckOn
  * @property string name
  * @property CodeIgniter\I18n\Time updatedOn
  */
@@ -26,46 +28,62 @@ class MinorFaction extends Base\ExternalEntity
      * @var array
      */
     protected $dates = [
-            'updatedOn'
+            'lastCheckOn'
+            , 'updatedOn'
             ];
     /**
      * Array of al the Minor Faction Presence records for Minor Faction.
      * @var array
      */
-    public array $MinorFactionPresence = array();
+    public ?array $MinorFactionPresence = null;
+
+    public function findPresence () {
+        if ( ! empty( $this->id ) ) {
+            $this->MinorFactionPresence = model( PresenceModel::class )->findMinorFaction( $this->id );
+        }
+    }
 
     public function synchronize() {
         /**
-         * @var \App\Entities\MinorFactionPresence $objMinorFactionPresence
-         * @var \App\Models\MinorFactionPresence $objMinorFactionPresenceModel
+         * @var \App\Entities\MinorFactionPresence $objPresence
          */
 
-        $objMinorFactionCatalogue = Services::minorFactionCatalogue();
-        $blnMinorFactionSynchronized = $objMinorFactionCatalogue->getMinorFaction( $this );
+        $dtmLastCheckOn = $this->lastCheckOn;
 
-        if (
-                empty( $this->id )
-                ||
-                $this->hasChanged( 'updatedOn' )
-                )
-        {
-            model( MinorFactionModel::class )->save( $this );
+        if ( ! empty( $dtmLastCheckOn ) ) {
+            $objAppConfig = config( 'App' );
+            $objLastCheckExpiryInterval = new \DateInterval( 'PT' . ( $objAppConfig->ExternalCheckExpiryPeriod ) . 'S' );
+            $objLastCheckExpiryInterval->invert = 1;
+
+            if ( $dtmLastCheckOn >= Time::now()->add( $objLastCheckExpiryInterval ) ) {
+                return;
+            }
         }
 
-        $objMinorFactionPresenceModel = model( MinorFactionPresenceModel::class );
-        $this->MinorFactionPresence = $objMinorFactionPresenceModel->findMinorFaction( $this->id );
 
-        if ( $blnMinorFactionSynchronized ) {
-            $objMinorFactionCatalogue->getMinorFactionPresence( $this );
+        $objCatalogue = Services::minorFactionCatalogue();
+
+        if ( ! $objCatalogue->getMinorFaction( $this ) ) {
+            return;
         }
 
-        foreach ($this->MinorFactionPresence as $objMinorFactionPresence) {
-            if ( is_null( $objMinorFactionPresence->StarSystem ) ) {
-                $objMinorFactionPresence->StarSystem = new StarSystem( [ StarSystem::$externalIdColumn => $objMinorFactionPresence->{MinorFactionPresence::$externalSystemIdColumn} ] );
+        if ( is_null( $this->MinorFactionPresence ) ) {
+            $this->MinorFactionPresence = array();
+        }
+
+        if ( ! $objCatalogue->getPresence( $this ) ) {
+            throw \Exception( 'Synchrinizing Minor Faction Presence has failed to retrieve data from the Minor Faction Catalogue.');
+        }
+
+        foreach ($this->MinorFactionPresence as $objPresence) {
+            if ( is_null( $objPresence->StarSystem ) ) {
+                $objPresence->StarSystem = model( StarSystemModel::class )->findEntity( [ StarSystem::$externalIdColumn => $objPresence->{MinorFactionPresence::$externalSystemIdColumn} ] );
             };
 
-            $objMinorFactionPresence->StarSystem->synchronize();
+            $objPresence->StarSystem->synchronize();
         }
+
+        model( Model::class )->save( $this );
     }
 }
 

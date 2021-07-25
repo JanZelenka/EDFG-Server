@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
-use App\Entities\BgsTick as BgsTickEntity;
+
+use App\Entities\BgsTick as Entity;
 
 /**
  *
@@ -11,7 +12,7 @@ class BgsTick extends Base\StampedModel
 {
     protected $table = 'bgs_tick';
     protected $primaryKey = 'id';
-    protected $returnType = BgsTickEntity::class;
+    protected $returnType = Entity::class;
     protected $useSoftDeletes = false;
     protected $allowedFields = [
             'ebgsId'
@@ -19,7 +20,7 @@ class BgsTick extends Base\StampedModel
             , 'occuredOn'
     ];
 
-    public function GetLastTick(): ?BgsTickEntity {
+    public function GetLastTick(): ?Entity {
         return $this
             ->limit( 1 )
             ->orderBy( 'occuredOn', 'desc' )
