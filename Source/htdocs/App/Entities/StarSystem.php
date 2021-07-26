@@ -4,6 +4,7 @@ namespace App\Entities;
 use Config\Services;
 use App\Models\MinorFactionPresence as PresenceModel;
 use App\Models\StarSystem as Model;
+use CodeIgniter\Entity\Entity;
 use CodeIgniter\I18n\Time;
 
 /**
@@ -11,16 +12,22 @@ use CodeIgniter\I18n\Time;
  * @author Jan Zelenka <jan.zelenka@clickworks.eu>
  *
  * @property int id
+ * @property string allegiance
  * @property float coordX
  * @property float coordY
  * @property float coordZ
  * @property string ebgsId
+ * @property string economyPrimary
+ * @property string economySecondary
  * @property string eddbId
  * @property \CodeIgniter\I18n\Time lastCheckOn
  * @property string name
+ * @property int population
+ * @property string security
+ * @property string state
  * @property \CodeIgniter\I18n\Time updatedOn
  */
-class StarSystem extends Base\ExternalEntity
+class StarSystem extends Entity
 {
     protected $dates = [
             'lastCheckOn'

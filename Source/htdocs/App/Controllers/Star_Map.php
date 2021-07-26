@@ -4,10 +4,10 @@ namespace App\Controllers;
 
 use App\Models\MinorFaction as MinorFactionModel;
 
-class StarMap extends Base\TickSensitive
+class Star_Map extends Base\TickSensitive
 {
 
-	public function minorFaction ( $identifier ) {
+	public function minor_faction ( $identifier ) {
 	    /**
 	     * @var \App\Entities\MinorFaction $objMinorFaction
 	     * @var \App\Entities\MinorFactionPresence $objPresence

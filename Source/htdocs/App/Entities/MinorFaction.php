@@ -6,6 +6,7 @@ use Config\Services;
 use App\Models\MinorFaction as Model;
 use App\Models\MinorFactionPresence as PresenceModel;
 use App\Models\StarSystem as StarSystemModel;
+use CodeIgniter\Entity\Entity;
 use CodeIgniter\I18n\Time;
 
 /**
@@ -21,7 +22,7 @@ use CodeIgniter\I18n\Time;
  * @property string name
  * @property CodeIgniter\I18n\Time updatedOn
  */
-class MinorFaction extends Base\ExternalEntity
+class MinorFaction extends Entity
 {
     /**
      *
@@ -39,7 +40,10 @@ class MinorFaction extends Base\ExternalEntity
 
     public function findPresence () {
         if ( ! empty( $this->id ) ) {
-            $this->MinorFactionPresence = model( PresenceModel::class )->findMinorFaction( $this->id );
+            $this->MinorFactionPresence = model( PresenceModel::class )->findMinorFaction(
+                    $this->id
+                    , Services::minorFactionCatalogue()->presenceRelationshipMap()[ self::class ][ 'MinorFactionPresence' ]
+                    );
         }
     }
 
@@ -75,9 +79,11 @@ class MinorFaction extends Base\ExternalEntity
             throw \Exception( 'Synchrinizing Minor Faction Presence has failed to retrieve data from the Minor Faction Catalogue.');
         }
 
+        $arrRelationshipMap = Services::starSystemCatalogue()->starSystemRelationshipMap();
+
         foreach ($this->MinorFactionPresence as $objPresence) {
             if ( is_null( $objPresence->StarSystem ) ) {
-                $objPresence->StarSystem = model( StarSystemModel::class )->findEntity( [ StarSystem::$externalIdColumn => $objPresence->{MinorFactionPresence::$externalSystemIdColumn} ] );
+                $objPresence->StarSystem = model( StarSystemModel::class )->findEntity( [ $arrRelationshipMap[ StarSystem::class ][ '_key' ] => $objPresence->{$arrRelationshipMap[ MinorFactionPresence::class ][ 'StarSystem' ]} ] );
             };
 
             $objPresence->StarSystem->synchronize();

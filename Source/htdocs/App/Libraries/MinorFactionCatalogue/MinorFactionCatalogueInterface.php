@@ -23,5 +23,13 @@ interface MinorFactionCatalogueInterface
      * @return bool
      */
     public function getPresence( Entity $objMinorFaction ): bool;
+
+    /**
+     * Defines which Minor Faction Presence attributes are used as key in other entities' arrays
+     * of these objects
+     *
+     * @var array
+     */
+    public function presenceRelationshipMap (): array;
 }
 

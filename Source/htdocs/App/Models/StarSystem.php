@@ -15,13 +15,19 @@ class StarSystem extends Base\StampedModel {
     protected $returnType = Entity::class;
     protected $useSoftDeletes = false;
     protected $allowedFields = [
-            'coordX'
+            'allegiance'
+            , 'coordX'
             , 'coordY'
             , 'coordZ'
             , 'ebgsId'
+            , 'economyPrimary'
+            , 'economySecondary'
             , 'eddbId'
             , 'lastCheckOn'
             , 'name'
+            , 'population'
+            , 'security'
+            , 'state'
             , 'updatedOn'
            ];
 

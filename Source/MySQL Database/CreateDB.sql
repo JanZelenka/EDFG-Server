@@ -53,7 +53,7 @@ CREATE TABLE `bgs_tick` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `IX_occuredOn_UNIQUE` (`occuredOn`),
   UNIQUE KEY `IX_ebgsId_UNIQUE` (`ebgsId`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -156,7 +156,7 @@ CREATE TABLE `minor_faction_presence` (
   `zzzModifiedBy` varchar(62) COLLATE utf8_unicode_ci DEFAULT NULL,
   `zzzModifiedOn` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=174 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=223 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -179,13 +179,19 @@ SET character_set_client = utf8;
  1 AS `zzzModifiedBy`,
  1 AS `zzzModifiedOn`,
  1 AS `starSystem_id`,
+ 1 AS `starSystem_allegiance`,
  1 AS `starSystem_coordX`,
  1 AS `starSystem_coordY`,
  1 AS `starSystem_coordZ`,
  1 AS `starSystem_ebgsId`,
+ 1 AS `starSystem_economyPrimary`,
+ 1 AS `starSystem_economySecondary`,
  1 AS `starSystem_eddbId`,
- 1 AS `starSystem_name`,
  1 AS `starSystem_lastCheckOn`,
+ 1 AS `starSystem_name`,
+ 1 AS `starSystem_population`,
+ 1 AS `starSystem_security`,
+ 1 AS `starSystem_state`,
  1 AS `starSystem_updatedOn`,
  1 AS `starSystem_zzzCreatedBy`,
  1 AS `starSystem_zzzCreatedOn`,
@@ -310,14 +316,21 @@ DROP TABLE IF EXISTS `star_system`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `star_system` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `coordX` float DEFAULT NULL,
-  `coordY` float DEFAULT NULL,
-  `coordZ` float DEFAULT NULL,
+  `minorFactionId_Controlling` int(11) DEFAULT NULL,
+  `allegiance` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `coordX` float NOT NULL,
+  `coordY` float NOT NULL,
+  `coordZ` float NOT NULL,
   `ebgsId` varchar(24) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `economyPrimary` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `economySecondary` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `eddbId` int(11) DEFAULT NULL,
-  `lastCheckOn` datetime DEFAULT NULL,
+  `lastCheckOn` datetime NOT NULL,
   `name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `updatedOn` datetime DEFAULT NULL,
+  `population` int(11) DEFAULT NULL,
+  `security` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `state` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updatedOn` datetime NOT NULL,
   `zzzCreatedBy` varchar(62) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `zzzCreatedOn` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `zzzModifiedBy` varchar(62) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -459,6 +472,10 @@ CREATE TABLE `user_security_role` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping events for database 'faction_guard'
+--
+
+--
 -- Dumping routines for database 'faction_guard'
 --
 
@@ -493,7 +510,7 @@ CREATE TABLE `user_security_role` (
 /*!50001 SET collation_connection      = utf8_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `minor_faction_presence_view` AS select `mfp`.`id` AS `id`,`mfp`.`ebgsSystemId` AS `ebgsSystemId`,`mfp`.`influence` AS `influence`,`mfp`.`minorFactionId` AS `minorFactionId`,`mfp`.`starSystemId` AS `starSystemId`,`mfp`.`updatedOn` AS `updatedOn`,`mfp`.`zzzCreatedBy` AS `zzzCreatedBy`,`mfp`.`zzzCreatedOn` AS `zzzCreatedOn`,`mfp`.`zzzModifiedBy` AS `zzzModifiedBy`,`mfp`.`zzzModifiedOn` AS `zzzModifiedOn`,`sts`.`id` AS `starSystem_id`,`sts`.`coordX` AS `starSystem_coordX`,`sts`.`coordY` AS `starSystem_coordY`,`sts`.`coordZ` AS `starSystem_coordZ`,`sts`.`ebgsId` AS `starSystem_ebgsId`,`sts`.`eddbId` AS `starSystem_eddbId`,`sts`.`name` AS `starSystem_name`,`sts`.`lastCheckOn` AS `starSystem_lastCheckOn`,`sts`.`updatedOn` AS `starSystem_updatedOn`,`sts`.`zzzCreatedBy` AS `starSystem_zzzCreatedBy`,`sts`.`zzzCreatedOn` AS `starSystem_zzzCreatedOn`,`sts`.`zzzModifiedBy` AS `starSystem_zzzModifiedBy`,`sts`.`zzzModifiedOn` AS `starSystem_zzzModifiedOn` from (`minor_faction_presence` `mfp` left join `star_system` `sts` on((`mfp`.`starSystemId` = `sts`.`id`))) */;
+/*!50001 VIEW `minor_faction_presence_view` AS select `mfp`.`id` AS `id`,`mfp`.`ebgsSystemId` AS `ebgsSystemId`,`mfp`.`influence` AS `influence`,`mfp`.`minorFactionId` AS `minorFactionId`,`mfp`.`starSystemId` AS `starSystemId`,`mfp`.`updatedOn` AS `updatedOn`,`mfp`.`zzzCreatedBy` AS `zzzCreatedBy`,`mfp`.`zzzCreatedOn` AS `zzzCreatedOn`,`mfp`.`zzzModifiedBy` AS `zzzModifiedBy`,`mfp`.`zzzModifiedOn` AS `zzzModifiedOn`,`sts`.`id` AS `starSystem_id`,`sts`.`allegiance` AS `starSystem_allegiance`,`sts`.`coordX` AS `starSystem_coordX`,`sts`.`coordY` AS `starSystem_coordY`,`sts`.`coordZ` AS `starSystem_coordZ`,`sts`.`ebgsId` AS `starSystem_ebgsId`,`sts`.`economyPrimary` AS `starSystem_economyPrimary`,`sts`.`economySecondary` AS `starSystem_economySecondary`,`sts`.`eddbId` AS `starSystem_eddbId`,`sts`.`lastCheckOn` AS `starSystem_lastCheckOn`,`sts`.`name` AS `starSystem_name`,`sts`.`population` AS `starSystem_population`,`sts`.`security` AS `starSystem_security`,`sts`.`state` AS `starSystem_state`,`sts`.`updatedOn` AS `starSystem_updatedOn`,`sts`.`zzzCreatedBy` AS `starSystem_zzzCreatedBy`,`sts`.`zzzCreatedOn` AS `starSystem_zzzCreatedOn`,`sts`.`zzzModifiedBy` AS `starSystem_zzzModifiedBy`,`sts`.`zzzModifiedOn` AS `starSystem_zzzModifiedOn` from (`minor_faction_presence` `mfp` left join `star_system` `sts` on((`mfp`.`starSystemId` = `sts`.`id`))) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -507,4 +524,4 @@ CREATE TABLE `user_security_role` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-07-25 22:09:06
+-- Dump completed on 2021-07-27  0:10:36

@@ -16,7 +16,21 @@ class EliteBGS
     extends EliteBGSBase
     implements MinorFactionCatalogueInterface
 {
-    protected $arrData = array();
+    /**
+     * Caches results of the calls to EliteBGS factions endpoint during the lifetime of the object so that
+     * unnecessary calls are avoided
+     * @var array
+     */
+    protected array $data = array();
+
+    protected array $presenceRelationshipMap = [
+            \App\Entities\MinorFaction::class => [ 'MinorFactionPresence' => 'starSystemId']
+    ];
+    /**
+     *
+     * @var string
+     */
+    protected string $presenceDataIdKey = 'system_id';
 
     /**
      * (non-PHPdoc)
@@ -50,7 +64,7 @@ class EliteBGS
      * @return object|NULL
      */
     protected function getData ( Entity $objEntity ): ?object {
-        $objData = $this->arrData[ $objEntity->ebgsId ] ?? null;
+        $objData = $this->data[ $objEntity->ebgsId ] ?? null;
 
         if ( ! is_null( $objData ) ) {
             return $objData;
@@ -87,14 +101,12 @@ class EliteBGS
             return false;
         }
 
+
+
         foreach ($objData->faction_presence as $objPresenceData ) {
-            $objPresence = $objEntity->MinorFactionPresence[ $objPresenceData->{PresenceEntity::$externalIdDataKey} ] ?? null;
-
-            if ( is_null( $objPresence ) ) {
-                $objPresence = new PresenceEntity();
-                $objEntity->MinorFactionPresence[ $objPresenceData->{PresenceEntity::$externalIdDataKey} ] = $objPresence;
-            }
-
+            $objPresence =
+                $objEntity->MinorFactionPresence[ $objPresenceData->{$this->presenceDataIdKey} ]
+                ?? $objEntity->MinorFactionPresence[ $objPresenceData->{$this->presenceDataIdKey} ] = new PresenceEntity();
             $objPresence->ebgsSystemId = $objPresenceData->system_id;
             $objPresence->influence = $objPresenceData->influence;
             $objPresence->updatedOn = $this->getTime( $objData->updated_at );
@@ -132,6 +144,15 @@ class EliteBGS
         }
 
         return $objData ?? null;
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     * @see \App\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface::presenceKeyAttribute()
+     */
+    public function presenceRelationshipMap (): array {
+        return $this->presenceRelationshipMap;
     }
 }
 

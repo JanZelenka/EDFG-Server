@@ -2,10 +2,9 @@
 
 namespace App\Controllers;
 
-use App\Entities\MinorFaction as Entity;
 use App\Models\MinorFaction as Model;
 
-class MinorFaction extends Base\TickSensitive
+class Minor_Faction extends Base\TickSensitive
 {
     public function index ( string $minor_faction_id = null ) {
         /**
@@ -22,7 +21,7 @@ class MinorFaction extends Base\TickSensitive
         return view('welcome_message');
     }
 
-    public function updatePresence( string $strName = null )
+    public function update_presence( string $strName = null )
 	{
 	    return view('welcome_message');
 	}

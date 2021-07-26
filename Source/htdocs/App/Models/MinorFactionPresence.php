@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use App\Entities\MinorFactionPresence as Entity;
+use Config\Services;
 
 /**
  *
@@ -22,7 +23,11 @@ class MinorFactionPresence extends Base\StampedModel
             , 'updatedOn'
     ];
 
-    public function findMinorFaction ( int $intMinorFactionId ): ?array {
+    public function findMinorFaction (
+            int $intMinorFactionId
+            , string $strKeyAttribute
+            ): ?array
+    {
         /** @var \CodeIgniter\Database\ResultInterface $objResult */
         $objResult = $this->db
             ->table( 'minor_faction_presence_view' )
@@ -51,7 +56,7 @@ class MinorFactionPresence extends Base\StampedModel
                         );
             }
 
-            $arrPresence[ $objEntity->{Entity::$externalIdColumn} ] = $objEntity;
+            $arrPresence[ $objEntity->{$strKeyAttribute} ] = $objEntity;
         }
 
         return (
