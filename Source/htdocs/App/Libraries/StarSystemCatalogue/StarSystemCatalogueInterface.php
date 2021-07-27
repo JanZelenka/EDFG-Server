@@ -1,7 +1,8 @@
 <?php
 namespace App\Libraries\StarSystemCatalogue;
 
-use App\Entities\StarSystem;
+use App\Entities\MinorFaction as MinorFactionEntity;
+use App\Entities\StarSystem as Entity;
 
 /**
  *
@@ -11,16 +12,27 @@ use App\Entities\StarSystem;
 interface StarSystemCatalogueInterface
 {
     /**
-     * @return StarSystem[]
-     * @param array $arrParams
+     * Gets all the Star Systems for the specified Minor Faction.
+     * Links the StarSystem attribute of each Minor Faction Presence Entity with the obtained data.
+     *
+     * @param MinorFactionEntity $objMinorFaction
+     * @return bool
      */
-    public function getStarSystem ( StarSystem $objStarSystem ) : bool;
+    public function getMinorFactionStarSystems ( MinorFactionEntity $objMinorFaction ): bool;
 
     /**
-     * Defines which Star System attributes are used as key in other entities' arrays
+     * Gets Elite BGS Star System data for the specified Star System.
+     *
+     * @return bool
+     * @param Entity $objEntity
+     */
+    public function getStarSystem ( Entity $objEntity ) : bool;
+
+    /**
+     * Defines which Star System attribute is used as the key in other arrays
      * of these objects.
      *
-     * @var array
+     * @return string
      */
-    public function starSystemRelationshipMap (): array;
+    public function externalKey (): string;
 }

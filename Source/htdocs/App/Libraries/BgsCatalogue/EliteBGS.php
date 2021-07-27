@@ -31,10 +31,14 @@ class EliteBGS
                 );
 
         if ( $objResponse->getStatusCode() < 300 ) {
-            $objResponseBody = json_decode( $objResponse->getBody());
+            $arrData = json_decode(
+                    $objResponse->getBody()
+                    , true
+                    );
 
-            if ( $objResponseBody[0]->_id !== $objBgsTick->ebgsId ) {
-                $objOccuredOn = $this->getTime( $objResponseBody[0]->time );
+            if ( $arrData[ 0 ][ '_id' ] !== $objBgsTick->ebgsId ) {
+                $objBgsTick->
+                $objOccuredOn = $this->getTime( $arrData[ 0 ][ 'time' ] );
                 $objBgsTick = new BgsTick(
                         $objResponseBody[0]->_id
                         , $objOccuredOn

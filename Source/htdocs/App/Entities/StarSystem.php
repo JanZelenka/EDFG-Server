@@ -4,14 +4,11 @@ namespace App\Entities;
 use Config\Services;
 use App\Models\MinorFactionPresence as PresenceModel;
 use App\Models\StarSystem as Model;
-use CodeIgniter\Entity\Entity;
-use CodeIgniter\I18n\Time;
 
 /**
  *
  * @author Jan Zelenka <jan.zelenka@clickworks.eu>
  *
- * @property int id
  * @property string allegiance
  * @property float coordX
  * @property float coordY
@@ -20,19 +17,13 @@ use CodeIgniter\I18n\Time;
  * @property string economyPrimary
  * @property string economySecondary
  * @property string eddbId
- * @property \CodeIgniter\I18n\Time lastCheckOn
  * @property string name
  * @property int population
  * @property string security
  * @property string state
- * @property \CodeIgniter\I18n\Time updatedOn
  */
-class StarSystem extends Entity
+class StarSystem extends Base\ExternalEntity
 {
-    protected $dates = [
-            'lastCheckOn'
-            , 'updatedOn'
-            ];
     /** @var ?array \App\Entities\MinorFactionPresence */
     public ?array $MinorFactions = null;
 
@@ -51,25 +42,7 @@ class StarSystem extends Entity
         /** @var \Config\App $objAppConfig */
         /** @var \App\Libraries\StarSystemCatalogue\StarSystemCatalogueInterface $objCatalogue */
 
-        $blnsynchronize = true;
-        $dtmUpdateOn = $this->updatedOn;
-
-        if ( ! empty( $dtmUpdateOn ) ) {
-            $dtmLastCheckOn = $this->lastCheckOn;
-
-            if ( ! empty( $dtmLastCheckOn ) ) {
-                $objSession = Services::session();
-                $objAppConfig = config( 'App' );
-                $objLastCheckExpiryInterval = new \DateInterval( 'PT' . ( $objAppConfig->ExternalCheckExpiryPeriod ) . 'S' );
-                $objLastCheckExpiryInterval->invert = 1;
-                $blnsynchronize =
-                    $dtmUpdateOn < $objSession->LastBgsTick->occuredOn
-                     &&
-                    $dtmLastCheckOn < ( Time::now()->add( $objLastCheckExpiryInterval ) );
-            }
-        }
-
-        if ( $blnsynchronize ) {
+        if ( $this->canSynchronize() ) {
             $objCatalogue = Services::starSystemCatalogue();
 
             if ( $objCatalogue->getStarSystem( $this ) ) {

@@ -8,7 +8,7 @@ use App\Entities\MinorFaction as Entity;
  * @author Jan Zelenka <jan.zelenka@clickworks.eu>
  *
  */
-class MinorFaction extends Base\StampedModel
+final class MinorFaction extends Base\ExternalDataModel
 {
     protected $table = 'minor_faction';
     protected $primaryKey = 'id';
@@ -19,38 +19,8 @@ class MinorFaction extends Base\StampedModel
             , 'eddbId'
             , 'allegiance'
             , 'government'
-            , 'lastCheckOn'
             , 'name'
-            , 'updatedOn'
     ];
-
-    /**
-     * Attempts to find the Minor Faction in the datatbase.
-     * If not found, a new Entity with query parameters is returned.
-     * @param mixed $key Either name of a search key, either an array of search key/value pairs
-     * @param mixed $value The value to search for in case the $kye
-     * @return Entity
-     */
-    public function findMinorFaction (
-            $key
-            , $value = null
-            ): Entity
-    {
-        if (! is_array($key))
-        {
-            $key = [$key => $value];
-        }
-
-        $objEntity = $this
-            ->where( $key )
-            ->first();
-
-        if ( is_null( $objEntity ) ) {
-            $objEntity = new Entity( $key );
-        }
-
-        return $objEntity;
-    }
 
     /**
      *
@@ -63,13 +33,12 @@ class MinorFaction extends Base\StampedModel
          * @var \App\Entities\MinorFactionPresence $objPresenceEntity
          * @var MinorFactionPresence $objPresenceModel
          */
-
         $blnSuccess = parent::save( $MinorFaction );
 
         if (
                 $blnSuccess
                  &&
-                ( $MinorFaction instanceof Entity )
+                $MinorFaction instanceof Entity
                  &&
                 ! empty( $MinorFaction->MinorFactionPresence )
                 )
@@ -82,8 +51,6 @@ class MinorFaction extends Base\StampedModel
                 $objPresenceModel->save( $objPresenceEntity );
             }
         }
-
-        return $blnSuccess;
     }
 }
 

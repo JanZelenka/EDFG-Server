@@ -13,11 +13,10 @@ class Star_Map extends Base\TickSensitive
 	     * @var \App\Entities\MinorFactionPresence $objPresence
 	     */
 
-	    $objMinorFaction = model( MinorFactionModel::class )->findMinorFaction(
+	    $objMinorFaction = model( MinorFactionModel::class )->findEntity(
 	            'name'
 	            , $identifier
 	            );
-	    $objMinorFaction->findPresence();
 	    $objMinorFaction->synchronize();
 	    $arrStarSystems = array();
 	    $fltViewPointX = $fltViewPointY = $fltViewPointZ = 0;

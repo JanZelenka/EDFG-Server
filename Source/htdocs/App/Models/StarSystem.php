@@ -3,18 +3,15 @@
 namespace App\Models;
 
 use App\Entities\StarSystem as Entity;
+use Config\Services;
 
 /**
  *
  * @author Jan Zelenka <jan.zelenka@telenet.be>
  *
  */
-class StarSystem extends Base\StampedModel {
-    protected $table = 'star_system';
-    protected $primaryKey = 'id';
-    protected $returnType = Entity::class;
-    protected $useSoftDeletes = false;
-    protected $allowedFields = [
+final class StarSystem extends Base\ExternalDataModel {
+    protected array $allowedFields = [
             'allegiance'
             , 'coordX'
             , 'coordY'
@@ -23,13 +20,16 @@ class StarSystem extends Base\StampedModel {
             , 'economyPrimary'
             , 'economySecondary'
             , 'eddbId'
-            , 'lastCheckOn'
             , 'name'
             , 'population'
             , 'security'
             , 'state'
-            , 'updatedOn'
            ];
+    public array $loadedStarSystems = [];
+    protected string $primaryKey = 'id';
+    protected string $returnType = Entity::class;
+    protected string $table = 'star_system';
+    protected bool $useSoftDeletes = false;
 
     /**
      * Creates the Return object populated with data from other source than the native table.
@@ -39,19 +39,30 @@ class StarSystem extends Base\StampedModel {
      * @param object $objViewRow
      * @return Entity
      */
-    public function newFromViewResult (
+    public function newFromResultRow (
             string $strColumnNamePrefix
-            , object $objViewRow
+            , array $arrRow
             ): Entity
     {
-        $objStarSystem = new $this->returnType();
-        $objStarSystem->id = $objViewRow->{$strColumnNamePrefix . 'id'};
+        $strExternalKey = Services::starSystemCatalogue()->externalKey();
+        $varId = $arrRow[ $strColumnNamePrefix . $strExternalKey ];
 
-        foreach ($this->allowedFields as $strFieldName) {
-            $strViewFieldName = $strColumnNamePrefix . $strFieldName;
-            $objStarSystem->{$strFieldName} = $objViewRow->{$strViewFieldName};
+        if ( empty( $varId ) ) {
+            return null;
         }
 
-        return $objStarSystem;
+        $objEntity =
+            $this->loadedStarSystems[ $varId ]
+            ?? $this->loadedStarSystems[ $varId ] = new $this->returnType();
+
+        $intPrefixLength = strlen( $strColumnNamePrefix );
+
+        foreach ($arrRow as $strField => $varValue) {
+            if ( substr( $strField, 0, $intPrefixLength ) = $strColumnNamePrefix ) {
+                $objEntity->{substr( $strField, $intPrefixLength )} = $varValue;
+            }
+        }
+
+        return $objEntity;
     }
 }

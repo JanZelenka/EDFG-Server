@@ -149,10 +149,10 @@ class EliteBGS
     /**
      *
      * {@inheritDoc}
-     * @see \App\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface::presenceKeyAttribute()
+     * @see \App\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface::presenceExternalKey()
      */
-    public function presenceRelationshipMap (): array {
-        return $this->presenceRelationshipMap;
+    public function presenceExternalKey (): string {
+        return 'ebgsSystemId';
     }
 }
 

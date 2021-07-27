@@ -11,7 +11,6 @@ use CodeIgniter\Entity\Entity;
  *
  * @author Jan Zelenka <jan.zelenka@clickworks.eu>
  *
- * @property int id
  * @property string ebgsSystemId
  * @property float influence
  * @property int minorFactionId
@@ -19,11 +18,8 @@ use CodeIgniter\Entity\Entity;
  * @property CodeIgniter\I18n\Time updatedOn
  *
  */
-class MinorFactionPresence extends Entity
+class MinorFactionPresence extends Base\ExternalEntity
 {
-    protected $dates = [
-            'updatedOn'
-    ];
     public ?StarSystem $StarSystem = null;
 /*
     /**

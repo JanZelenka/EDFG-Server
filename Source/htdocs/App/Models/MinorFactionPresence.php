@@ -1,15 +1,17 @@
 <?php
 namespace App\Models;
 
-use App\Entities\MinorFactionPresence as Entity;
 use Config\Services;
+use App\Entities\MinorFaction as MinorFactionEntity;
+use App\Entities\MinorFactionPresence as Entity;
+use App\Models\StarSystem as StarSystemModel;
 
 /**
  *
  * @author Jan Zelenka <jan.zelenka@clickworks.eu>
  *
  */
-class MinorFactionPresence extends Base\StampedModel
+class MinorFactionPresence extends Base\ExternalDataModel
 {
     protected $table = 'minor_faction_presence';
     protected $primaryKey = 'id';
@@ -20,50 +22,57 @@ class MinorFactionPresence extends Base\StampedModel
             , 'influence'
             , 'minorFactionId'
             , 'starSystemId'
-            , 'updatedOn'
     ];
 
-    public function findMinorFaction (
-            int $intMinorFactionId
-            , string $strKeyAttribute
-            ): ?array
-    {
+    public function findForMinorFaction ( MinorFactionEntity $objMinorFactionEntity ) {
+        if ( is_null( $objMinorFactionEntity->MinorFactionPresence ) ) {
+            $objMinorFactionEntity->MinorFactionPresence = array();
+        }
+
+        $intId = $objMinorFactionEntity->id;
+
+        if ( empty( $intId ) ) {
+            return;
+        }
+
         /** @var \CodeIgniter\Database\ResultInterface $objResult */
         $objResult = $this->db
             ->table( 'minor_faction_presence_view' )
             ->where(
                     'minorFactionId'
-                    , $intMinorFactionId
+                    , $intId
                     )
             ->get();
 
-        $arrPresence = array();
+        $arrResult = $objResult->getResultArray();
 
-        foreach ( $objResult->getResult() as $objData ) {
+        if ( ! count( $arrResult ) ) {
+            return;
+        }
+
+        $strPresencePrefix = 'mfp_';
+        $intPresencePrefixLength = strlen( $strPresencePrefix );
+        $strStarSystemPrefix = 'sts_';
+        $strKeyAttribute = Services::minorFactionCatalogue()->presenceExternalKey();
+
+        foreach ( $arrResult as $arrRow ) {
             $objEntity = new Entity();
-            $objEntity->id = $objData->id;
 
-            foreach ( $this->allowedFields as $strFieldName ) {
-                $objEntity->{$strFieldName} = $objData->{$strFieldName};
+            foreach ($arrRow as $strField => $varValue) {
+                if ( substr( $strField, 0, 4 ) = $strPresencePrefix ) {
+                    $objEntity->{substr( $strField, $intPresencePrefixLength )} = $varValue;
+                }
             }
 
-            $strColumnNamePrefix = 'starSystem_';
-
-            if ( isset( $objData->{$strColumnNamePrefix . 'id'} ) ) {
-                $objEntity->StarSystem = model( StarSystem::class )->newFromViewResult(
-                        $strColumnNamePrefix
-                        , $objData
+            if ( isset( $arrRow->{$strStarSystemPrefix . 'id'} ) ) {
+                $objEntity->StarSystem = model( StarSystem::class )->newFromResultRow(
+                        $strStarSystemPrefix
+                        , $arrRow
                         );
             }
 
-            $arrPresence[ $objEntity->{$strKeyAttribute} ] = $objEntity;
+            $objMinorFactionEntity->MinorFactionPresence[ $objEntity->{$strKeyAttribute} ] = $objEntity;
         }
-
-        return (
-                empty( $arrPresence )
-                ? null
-                : $arrPresence
-                );
     }
 
     public function findStarSystem ( int $intStarSystemId ): ?array {
@@ -94,6 +103,7 @@ class MinorFactionPresence extends Base\StampedModel
         if ( $MinorFactionPresence instanceof Entity ) {
             /** @var \App\Entities\MinorFactionPresence $MinorFactionPresence */
             if ( ! is_null( $MinorFactionPresence->StarSystem ) ) {
+                model( StarSystemModel::class )->save( $MinorFactionPresence->StarSystem );
                 $MinorFactionPresence->starSystemId = $MinorFactionPresence->StarSystem->id;
             }
         }
@@ -101,4 +111,3 @@ class MinorFactionPresence extends Base\StampedModel
         return parent::save( $MinorFactionPresence );
     }
 }
-
