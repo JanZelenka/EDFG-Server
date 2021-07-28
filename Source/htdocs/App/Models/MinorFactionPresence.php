@@ -24,57 +24,6 @@ class MinorFactionPresence extends Base\ExternalDataModel
             , 'starSystemId'
     ];
 
-    public function findForMinorFaction ( MinorFactionEntity $objMinorFactionEntity ) {
-        if ( is_null( $objMinorFactionEntity->MinorFactionPresence ) ) {
-            $objMinorFactionEntity->MinorFactionPresence = array();
-        }
-
-        $intId = $objMinorFactionEntity->id;
-
-        if ( empty( $intId ) ) {
-            return;
-        }
-
-        /** @var \CodeIgniter\Database\ResultInterface $objResult */
-        $objResult = $this->db
-            ->table( 'minor_faction_presence_view' )
-            ->where(
-                    'minorFactionId'
-                    , $intId
-                    )
-            ->get();
-
-        $arrResult = $objResult->getResultArray();
-
-        if ( ! count( $arrResult ) ) {
-            return;
-        }
-
-        $strPresencePrefix = 'mfp_';
-        $intPresencePrefixLength = strlen( $strPresencePrefix );
-        $strStarSystemPrefix = 'sts_';
-        $strKeyAttribute = Services::minorFactionCatalogue()->presenceExternalKey();
-
-        foreach ( $arrResult as $arrRow ) {
-            $objEntity = new Entity();
-
-            foreach ($arrRow as $strField => $varValue) {
-                if ( substr( $strField, 0, 4 ) = $strPresencePrefix ) {
-                    $objEntity->{substr( $strField, $intPresencePrefixLength )} = $varValue;
-                }
-            }
-
-            if ( isset( $arrRow->{$strStarSystemPrefix . 'id'} ) ) {
-                $objEntity->StarSystem = model( StarSystem::class )->newFromResultRow(
-                        $strStarSystemPrefix
-                        , $arrRow
-                        );
-            }
-
-            $objMinorFactionEntity->MinorFactionPresence[ $objEntity->{$strKeyAttribute} ] = $objEntity;
-        }
-    }
-
     public function findStarSystem ( int $intStarSystemId ): ?array {
         /** @var \CodeIgniter\Database\ResultInterface $objResult */
 
@@ -99,6 +48,23 @@ class MinorFactionPresence extends Base\ExternalDataModel
                 );
     }
 
+    public function newFromResultRow (
+            array $arrRow
+            , string $strFieldPrefix
+            ): Entity
+    {
+        return parent::newFromResultRow(
+                $arrRow
+                , $strFieldPrefix
+                , Services::minorFactionCatalogue()->externalPresenceKey()
+                );
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     * @see \App\Models\Base\ExternalDataModel::save()
+     */
     public function save( $MinorFactionPresence ): bool {
         if ( $MinorFactionPresence instanceof Entity ) {
             /** @var \App\Entities\MinorFactionPresence $MinorFactionPresence */

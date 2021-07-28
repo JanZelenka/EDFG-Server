@@ -20,4 +20,24 @@ class BaseEntity extends Entity
         $this->dates[] = 'zzzCreatedOn';
         $this->dates[] = 'zzzModifiedOn';
     }
+
+    public function fillFromResultRow(
+            array $arrRow
+            , string $strFieldPrefix
+            )
+    {
+        if ( empty( $arrRow ) ) {
+            return;
+        }
+
+        $intPrefixLength = strlen( $strFieldPrefix );
+
+        foreach ($arrRow as $strField => $varValue) {
+            if ( substr( $strField, 0, $intPrefixLength ) = $strFieldPrefix ) {
+                $this->{substr( $strField, $intPrefixLength )} = $varValue;
+            }
+        }
+
+        $this->syncOriginal();
+    }
 }

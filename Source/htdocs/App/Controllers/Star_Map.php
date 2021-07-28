@@ -3,17 +3,14 @@
 namespace App\Controllers;
 
 use App\Models\MinorFaction as MinorFactionModel;
+use App\Models\StarSystem as StarSystemModel;
 
 class Star_Map extends Base\TickSensitive
 {
 
-	public function minor_faction ( $identifier ) {
-	    /**
-	     * @var \App\Entities\MinorFaction $objMinorFaction
-	     * @var \App\Entities\MinorFactionPresence $objPresence
-	     */
-
-	    $objMinorFaction = model( MinorFactionModel::class )->findEntity(
+	public function show_minor_faction ( $identifier ) {
+	    /** @var \App\Entities\MinorFaction $objMinorFaction */
+	    $objMinorFaction = model( MinorFactionModel::class )->findEntityStarSystems(
 	            'name'
 	            , $identifier
 	            );
@@ -21,8 +18,8 @@ class Star_Map extends Base\TickSensitive
 	    $arrStarSystems = array();
 	    $fltViewPointX = $fltViewPointY = $fltViewPointZ = 0;
 
+	    /** @var \App\Entities\MinorFactionPresence $objPresence */
 	    foreach ( $objMinorFaction->MinorFactionPresence as $objPresence ) {
-	        $objPresence->StarSystem->findMinorFactions();
 	        $arrStarSystems[ $objPresence->StarSystem->id ] = $objPresence->StarSystem;
 	        $fltViewPointX += $objPresence->StarSystem->coordX;
 	        $fltViewPointY += $objPresence->StarSystem->coordY;
@@ -47,5 +44,14 @@ class Star_Map extends Base\TickSensitive
 	                    , 'fltViewPointZ' => $fltViewPointZ
         	            ]
 	            );
+	}
+
+	public function star_system ( $intId ) {
+	    /** @var \App\Entities\StarSystem $objStarSystem */
+	    $objStarSystem = model( StarSystemModel::class )->findStarSystemEntities(
+	            'id'
+	            , $intId
+	            );
+	    $objStarSystem->synchronize();
 	}
 }

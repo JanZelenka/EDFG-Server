@@ -2,7 +2,7 @@
 namespace App\Entities;
 
 use Config\Services;
-use App\Models\MinorFactionPresence as PresenceModel;
+use App\Models\MinorFaction as MinorFactionModel;
 use App\Models\StarSystem as Model;
 
 /**
@@ -26,12 +26,6 @@ class StarSystem extends Base\ExternalEntity
 {
     /** @var ?array \App\Entities\MinorFactionPresence */
     public ?array $MinorFactions = null;
-
-    public function findMinorFactions () {
-        if ( ! empty( $this->id ) ) {
-            $this->MinorFactions = model( PresenceModel::class )->findStarSystem( $this->id );
-        }
-    }
 
     /**
      * Synchronizes the Star System data with an external Star System Catalogue.

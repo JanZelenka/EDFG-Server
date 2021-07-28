@@ -101,8 +101,6 @@ class EliteBGS
             return false;
         }
 
-
-
         foreach ($objData->faction_presence as $objPresenceData ) {
             $objPresence =
                 $objEntity->MinorFactionPresence[ $objPresenceData->{$this->presenceDataIdKey} ]
@@ -149,9 +147,18 @@ class EliteBGS
     /**
      *
      * {@inheritDoc}
-     * @see \App\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface::presenceExternalKey()
+     * @see \App\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface::externalKey()
      */
-    public function presenceExternalKey (): string {
+    public function externalKey(): string {
+        return 'ebgsId';
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     * @see \App\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface::externalPresenceKey()
+     */
+    public function externalPresenceKey (): string {
         return 'ebgsSystemId';
     }
 }

@@ -22,13 +22,20 @@ interface MinorFactionCatalogueInterface
      * @param \App\Entities\MinorFaction $objMinorFaction
      * @return bool
      */
-    public function getPresence( Entity $objMinorFaction ): bool;
+    public function getPresence ( Entity $objMinorFaction ): bool;
+
+    /**
+     * Defines whuch Minor Faction attribute is used as the key in arrays of the Entity object.
+     *
+     * @return string
+     */
+    public function externalKey (): string;
 
     /**
      * Defines which Minor Faction Presence attribute is used as the key in arrays of the Entity object.
      *
-     * @var array
+`    * @return string
      */
-    public function presenceExternalKey (): string;
+    public function externalPresenceKey (): string;
 }
 

@@ -1,6 +1,7 @@
 <?php
 namespace App\Models\Base;
 
+use App\Entities\Base\BaseEntity;
 use CodeIgniter\Model;
 use CodeIgniter\Entity\Entity;
 
@@ -20,7 +21,7 @@ class BaseModel extends Model
             return null;
         }
 
-        if (! is_array($key))
+        if ( ! is_array( $key ) )
         {
             $key = [$key => $value];
         }
@@ -31,6 +32,33 @@ class BaseModel extends Model
 
         if ( is_null( $objEntity ) ) {
             $objEntity = new $this->returnType( $key );
+        }
+
+        return $objEntity;
+    }
+
+    public function newFromResultRow (
+            array $arrRow
+            , string $strFieldPrefix
+            , string $strExternalKey
+            , ?array $arrLoadedEntities = null
+            ): ?BaseEntity
+    {
+        $varId = $arrRow[ $strFieldPrefix . $strExternalKey ];
+
+        if ( empty( $varId ) ) {
+            return null;
+        }
+
+        /** @var Entity $objEntity */
+        $objEntity = new $this->returnType();
+        $objEntity->fillFromResultRow(
+                $arrRow
+                , $strFieldPrefix
+                );
+
+        if ( ! is_null( $arrLoadedEntities ) ) {
+            $arrLoadedEntities[ $varId ] = $objEntity;
         }
 
         return $objEntity;

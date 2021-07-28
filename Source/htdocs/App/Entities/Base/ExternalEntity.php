@@ -19,6 +19,11 @@ class ExternalEntity extends BaseEntity
         $this->dates[] = 'updatedOn';
     }
 
+    /**
+     * Determins whether the Entity fulfills all the conditions for contacting Catalogue service for fresh data.
+     *
+     * @return bool
+     */
     public function canSynchronize (): bool {
         return
             $this->isUpdateExpired()
@@ -26,6 +31,11 @@ class ExternalEntity extends BaseEntity
             $this->isCheckExpired();
     }
 
+    /**
+     * Determins whether the last check for fresh External Catalogue data has expired.
+     *
+     * @return bool
+     */
     protected function isCheckExpired (): bool {
         $dtmLastCheckOn = $this->lastCheckOn;
 
@@ -39,6 +49,11 @@ class ExternalEntity extends BaseEntity
         return $dtmLastCheckOn < ( Time::now()->add( $objLastCheckExpiryInterval ) );
     }
 
+    /**
+     * Determins whether the last data received from an External Catalogue is expired.
+     *
+     * @return bool
+     */
     protected function isUpdateExpired (): bool {
         $dtmUpdatedOn = $this->updatedOn;
         return

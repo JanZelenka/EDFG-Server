@@ -127,7 +127,7 @@ CREATE TABLE `minor_faction` (
   `government` varchar(45) COLLATE utf8_unicode_ci DEFAULT NULL,
   `lastCheckOn` datetime DEFAULT NULL,
   `name` varchar(126) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `updatedOn` datetime NOT NULL,
+  `updatedOn` datetime DEFAULT NULL,
   `zzzCreatedBy` varchar(62) COLLATE utf8_unicode_ci DEFAULT NULL,
   `zzzCreatedOn` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `zzzModifiedBy` varchar(62) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -150,7 +150,7 @@ CREATE TABLE `minor_faction_presence` (
   `influence` decimal(6,5) DEFAULT NULL,
   `minorFactionId` int(11) NOT NULL,
   `starSystemId` int(11) NOT NULL,
-  `updatedOn` datetime NOT NULL,
+  `updatedOn` datetime DEFAULT NULL,
   `zzzCreatedBy` varchar(62) COLLATE utf8_unicode_ci DEFAULT NULL,
   `zzzCreatedOn` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `zzzModifiedBy` varchar(62) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -160,14 +160,26 @@ CREATE TABLE `minor_faction_presence` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Temporary view structure for view `minor_faction_presence_view`
+-- Temporary view structure for view `minor_faction_star_systems_view`
 --
 
-DROP TABLE IF EXISTS `minor_faction_presence_view`;
-/*!50001 DROP VIEW IF EXISTS `minor_faction_presence_view`*/;
+DROP TABLE IF EXISTS `minor_faction_star_systems_view`;
+/*!50001 DROP VIEW IF EXISTS `minor_faction_star_systems_view`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `minor_faction_presence_view` AS SELECT 
+/*!50001 CREATE VIEW `minor_faction_star_systems_view` AS SELECT 
+ 1 AS `mfc_id`,
+ 1 AS `mfc_ebgsId`,
+ 1 AS `mfc_eddbId`,
+ 1 AS `mfc_allegiance`,
+ 1 AS `mfc_government`,
+ 1 AS `mfc_lastCheckOn`,
+ 1 AS `mfc_name`,
+ 1 AS `mfc_updatedOn`,
+ 1 AS `mfc_zzzCreatedBy`,
+ 1 AS `mfc_zzzCreatedOn`,
+ 1 AS `mfc_zzzModifiedBy`,
+ 1 AS `mfc_zzzModifiedOn`,
  1 AS `mfp_id`,
  1 AS `mfp_ebgsSystemId`,
  1 AS `mfp_influence`,
@@ -325,12 +337,12 @@ CREATE TABLE `star_system` (
   `economyPrimary` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `economySecondary` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `eddbId` int(11) DEFAULT NULL,
-  `lastCheckOn` datetime NOT NULL,
+  `lastCheckOn` datetime DEFAULT NULL,
   `name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `population` int(11) DEFAULT NULL,
   `security` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `state` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `updatedOn` datetime NOT NULL,
+  `updatedOn` datetime DEFAULT NULL,
   `zzzCreatedBy` varchar(62) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `zzzCreatedOn` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `zzzModifiedBy` varchar(62) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -340,6 +352,59 @@ CREATE TABLE `star_system` (
   UNIQUE KEY `eddbId_UNIQUE` (`eddbId`)
 ) ENGINE=MyISAM AUTO_INCREMENT=174 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Temporary view structure for view `star_system_minor_factions_view`
+--
+
+DROP TABLE IF EXISTS `star_system_minor_factions_view`;
+/*!50001 DROP VIEW IF EXISTS `star_system_minor_factions_view`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `star_system_minor_factions_view` AS SELECT 
+ 1 AS `sts_id`,
+ 1 AS `sts_minorFactionId_Controlling`,
+ 1 AS `sts_allegiance`,
+ 1 AS `sts_coordX`,
+ 1 AS `sts_coordY`,
+ 1 AS `sts_coordZ`,
+ 1 AS `sts_ebgsId`,
+ 1 AS `sts_economyPrimary`,
+ 1 AS `sts_economySecondary`,
+ 1 AS `sts_eddbId`,
+ 1 AS `sts_lastCheckOn`,
+ 1 AS `sts_name`,
+ 1 AS `sts_population`,
+ 1 AS `sts_security`,
+ 1 AS `sts_state`,
+ 1 AS `sts_updatedOn`,
+ 1 AS `sts_zzzCreatedBy`,
+ 1 AS `sts_zzzCreatedOn`,
+ 1 AS `sts_zzzModifiedBy`,
+ 1 AS `sts_zzzModifiedOn`,
+ 1 AS `mfp_id`,
+ 1 AS `mfp_ebgsSystemId`,
+ 1 AS `mfp_influence`,
+ 1 AS `mfp_minorFactionId`,
+ 1 AS `mfp_starSystemId`,
+ 1 AS `mfp_updatedOn`,
+ 1 AS `mfp_zzzCreatedBy`,
+ 1 AS `mfp_zzzCreatedOn`,
+ 1 AS `mfp_zzzModifiedBy`,
+ 1 AS `mfp_zzzModifiedOn`,
+ 1 AS `mfc_id`,
+ 1 AS `mfc_ebgsId`,
+ 1 AS `mfc_eddbId`,
+ 1 AS `mfc_allegiance`,
+ 1 AS `mfc_government`,
+ 1 AS `mfc_lastCheckOn`,
+ 1 AS `mfc_name`,
+ 1 AS `mfc_updatedOn`,
+ 1 AS `mfc_zzzCreatedBy`,
+ 1 AS `mfc_zzzCreatedOn`,
+ 1 AS `mfc_zzzModifiedBy`,
+ 1 AS `mfc_zzzModifiedOn`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `user`
@@ -498,10 +563,10 @@ CREATE TABLE `user_security_role` (
 /*!50001 SET collation_connection      = @saved_col_connection */;
 
 --
--- Final view structure for view `minor_faction_presence_view`
+-- Final view structure for view `minor_faction_star_systems_view`
 --
 
-/*!50001 DROP VIEW IF EXISTS `minor_faction_presence_view`*/;
+/*!50001 DROP VIEW IF EXISTS `minor_faction_star_systems_view`*/;
 /*!50001 SET @saved_cs_client          = @@character_set_client */;
 /*!50001 SET @saved_cs_results         = @@character_set_results */;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
@@ -510,7 +575,25 @@ CREATE TABLE `user_security_role` (
 /*!50001 SET collation_connection      = utf8_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `minor_faction_presence_view` AS select `mfp`.`id` AS `mfp_id`,`mfp`.`ebgsSystemId` AS `mfp_ebgsSystemId`,`mfp`.`influence` AS `mfp_influence`,`mfp`.`minorFactionId` AS `mfp_minorFactionId`,`mfp`.`starSystemId` AS `mfp_starSystemId`,`mfp`.`updatedOn` AS `mfp_updatedOn`,`mfp`.`zzzCreatedBy` AS `mfp_zzzCreatedBy`,`mfp`.`zzzCreatedOn` AS `mfp_zzzCreatedOn`,`mfp`.`zzzModifiedBy` AS `mfp_zzzModifiedBy`,`mfp`.`zzzModifiedOn` AS `mfp_zzzModifiedOn`,`sts`.`id` AS `sts_id`,`sts`.`allegiance` AS `sts_allegiance`,`sts`.`coordX` AS `sts_coordX`,`sts`.`coordY` AS `sts_coordY`,`sts`.`coordZ` AS `sts_coordZ`,`sts`.`ebgsId` AS `sts_ebgsId`,`sts`.`economyPrimary` AS `sts_economyPrimary`,`sts`.`economySecondary` AS `sts_economySecondary`,`sts`.`eddbId` AS `sts_eddbId`,`sts`.`lastCheckOn` AS `sts_lastCheckOn`,`sts`.`name` AS `sts_name`,`sts`.`population` AS `sts_population`,`sts`.`security` AS `sts_security`,`sts`.`state` AS `sts_state`,`sts`.`updatedOn` AS `sts_updatedOn`,`sts`.`zzzCreatedBy` AS `sts_zzzCreatedBy`,`sts`.`zzzCreatedOn` AS `sts_zzzCreatedOn`,`sts`.`zzzModifiedBy` AS `sts_zzzModifiedBy`,`sts`.`zzzModifiedOn` AS `sts_zzzModifiedOn` from (`minor_faction_presence` `mfp` left join `star_system` `sts` on((`mfp`.`starSystemId` = `sts`.`id`))) */;
+/*!50001 VIEW `minor_faction_star_systems_view` AS select `mfc`.`id` AS `mfc_id`,`mfc`.`ebgsId` AS `mfc_ebgsId`,`mfc`.`eddbId` AS `mfc_eddbId`,`mfc`.`allegiance` AS `mfc_allegiance`,`mfc`.`government` AS `mfc_government`,`mfc`.`lastCheckOn` AS `mfc_lastCheckOn`,`mfc`.`name` AS `mfc_name`,`mfc`.`updatedOn` AS `mfc_updatedOn`,`mfc`.`zzzCreatedBy` AS `mfc_zzzCreatedBy`,`mfc`.`zzzCreatedOn` AS `mfc_zzzCreatedOn`,`mfc`.`zzzModifiedBy` AS `mfc_zzzModifiedBy`,`mfc`.`zzzModifiedOn` AS `mfc_zzzModifiedOn`,`mfp`.`id` AS `mfp_id`,`mfp`.`ebgsSystemId` AS `mfp_ebgsSystemId`,`mfp`.`influence` AS `mfp_influence`,`mfp`.`minorFactionId` AS `mfp_minorFactionId`,`mfp`.`starSystemId` AS `mfp_starSystemId`,`mfp`.`updatedOn` AS `mfp_updatedOn`,`mfp`.`zzzCreatedBy` AS `mfp_zzzCreatedBy`,`mfp`.`zzzCreatedOn` AS `mfp_zzzCreatedOn`,`mfp`.`zzzModifiedBy` AS `mfp_zzzModifiedBy`,`mfp`.`zzzModifiedOn` AS `mfp_zzzModifiedOn`,`sts`.`id` AS `sts_id`,`sts`.`allegiance` AS `sts_allegiance`,`sts`.`coordX` AS `sts_coordX`,`sts`.`coordY` AS `sts_coordY`,`sts`.`coordZ` AS `sts_coordZ`,`sts`.`ebgsId` AS `sts_ebgsId`,`sts`.`economyPrimary` AS `sts_economyPrimary`,`sts`.`economySecondary` AS `sts_economySecondary`,`sts`.`eddbId` AS `sts_eddbId`,`sts`.`lastCheckOn` AS `sts_lastCheckOn`,`sts`.`name` AS `sts_name`,`sts`.`population` AS `sts_population`,`sts`.`security` AS `sts_security`,`sts`.`state` AS `sts_state`,`sts`.`updatedOn` AS `sts_updatedOn`,`sts`.`zzzCreatedBy` AS `sts_zzzCreatedBy`,`sts`.`zzzCreatedOn` AS `sts_zzzCreatedOn`,`sts`.`zzzModifiedBy` AS `sts_zzzModifiedBy`,`sts`.`zzzModifiedOn` AS `sts_zzzModifiedOn` from ((`minor_faction` `mfc` left join `minor_faction_presence` `mfp` on((`mfc`.`id` = `mfp`.`minorFactionId`))) left join `star_system` `sts` on((`mfp`.`starSystemId` = `sts`.`id`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `star_system_minor_factions_view`
+--
+
+/*!50001 DROP VIEW IF EXISTS `star_system_minor_factions_view`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `star_system_minor_factions_view` AS select `sts`.`id` AS `sts_id`,`sts`.`minorFactionId_Controlling` AS `sts_minorFactionId_Controlling`,`sts`.`allegiance` AS `sts_allegiance`,`sts`.`coordX` AS `sts_coordX`,`sts`.`coordY` AS `sts_coordY`,`sts`.`coordZ` AS `sts_coordZ`,`sts`.`ebgsId` AS `sts_ebgsId`,`sts`.`economyPrimary` AS `sts_economyPrimary`,`sts`.`economySecondary` AS `sts_economySecondary`,`sts`.`eddbId` AS `sts_eddbId`,`sts`.`lastCheckOn` AS `sts_lastCheckOn`,`sts`.`name` AS `sts_name`,`sts`.`population` AS `sts_population`,`sts`.`security` AS `sts_security`,`sts`.`state` AS `sts_state`,`sts`.`updatedOn` AS `sts_updatedOn`,`sts`.`zzzCreatedBy` AS `sts_zzzCreatedBy`,`sts`.`zzzCreatedOn` AS `sts_zzzCreatedOn`,`sts`.`zzzModifiedBy` AS `sts_zzzModifiedBy`,`sts`.`zzzModifiedOn` AS `sts_zzzModifiedOn`,`mfp`.`id` AS `mfp_id`,`mfp`.`ebgsSystemId` AS `mfp_ebgsSystemId`,`mfp`.`influence` AS `mfp_influence`,`mfp`.`minorFactionId` AS `mfp_minorFactionId`,`mfp`.`starSystemId` AS `mfp_starSystemId`,`mfp`.`updatedOn` AS `mfp_updatedOn`,`mfp`.`zzzCreatedBy` AS `mfp_zzzCreatedBy`,`mfp`.`zzzCreatedOn` AS `mfp_zzzCreatedOn`,`mfp`.`zzzModifiedBy` AS `mfp_zzzModifiedBy`,`mfp`.`zzzModifiedOn` AS `mfp_zzzModifiedOn`,`mfc`.`id` AS `mfc_id`,`mfc`.`ebgsId` AS `mfc_ebgsId`,`mfc`.`eddbId` AS `mfc_eddbId`,`mfc`.`allegiance` AS `mfc_allegiance`,`mfc`.`government` AS `mfc_government`,`mfc`.`lastCheckOn` AS `mfc_lastCheckOn`,`mfc`.`name` AS `mfc_name`,`mfc`.`updatedOn` AS `mfc_updatedOn`,`mfc`.`zzzCreatedBy` AS `mfc_zzzCreatedBy`,`mfc`.`zzzCreatedOn` AS `mfc_zzzCreatedOn`,`mfc`.`zzzModifiedBy` AS `mfc_zzzModifiedBy`,`mfc`.`zzzModifiedOn` AS `mfc_zzzModifiedOn` from ((`star_system` `sts` left join `minor_faction_presence` `mfp` on((`sts`.`id` = `mfp`.`starSystemId`))) left join `minor_faction` `mfc` on((`mfp`.`minorFactionId` = `mfc`.`id`))) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -524,4 +607,4 @@ CREATE TABLE `user_security_role` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-07-28  0:50:28
+-- Dump completed on 2021-07-28 23:44:08

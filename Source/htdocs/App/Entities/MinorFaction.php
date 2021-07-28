@@ -41,10 +41,6 @@ class MinorFaction extends Base\ExternalEntity
             return;
         }
 
-        if ( is_null( $this->MinorFactionPresence ) ) {
-            model( PresenceModel::class )->findForMinorFaction( $this );
-        }
-
         if ( ! $objCatalogue->getPresence( $this ) ) {
             throw \Exception( 'Synchronizing Minor Faction Presence has failed to retrieve data from the Minor Faction Catalogue.');
         }
