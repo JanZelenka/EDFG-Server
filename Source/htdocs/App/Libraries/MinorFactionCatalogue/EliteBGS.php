@@ -6,6 +6,7 @@ use App\Entities\MinorFaction as Entity;
 use App\Entities\MinorFactionPresence as PresenceEntity;
 use App\Libraries\EliteBGS as EliteBGSBase;
 use CodeIgniter\I18n\Time;
+use App\Entities\MinorFaction;
 
 /**
  *
@@ -33,92 +34,12 @@ class EliteBGS
     protected string $presenceDataIdKey = 'system_id';
 
     /**
-     * (non-PHPdoc)
      *
-     * @see \App\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface::getMinorFaction()
-     */
-    public function getMinorFaction ( Entity $objEntity ): bool    {
-        $objData = $this->getData( $objEntity );
-
-        if ( is_null( $objData ) ) {
-            return false;
-        }
-
-        /** @var \Config\EliteBGS $objConfig */
-        $objConfig = config( 'EliteBGS');
-
-        $objEntity->ebgsId = $objData->_id;
-        $objEntity->eddbId = $objData->eddb_id;
-        $objEntity->allegiance = $objData->allegiance;
-        $objEntity->government = $objData->government;
-        $objEntity->lastCheckOn = Time::now();
-        $objEntity->name = $objData->name;
-        $objEntity->updatedOn = $this->getTime( $objData->updated_at );
-        return true;
-    }
-
-    /**
-     * Returns the JSON object as received from the EliteBGS Factions endpoint.
-     * @param Entity $objEntity
+     * @param string $strUrlParams
      * @throws \Exception
-     * @return object|NULL
+     * @return array
      */
-    protected function getData ( Entity $objEntity ): ?object {
-        $objData = $this->data[ $objEntity->ebgsId ] ?? null;
-
-        if ( ! is_null( $objData ) ) {
-            return $objData;
-        }
-
-        $strEbgsId = $objEntity->ebgsId;
-
-        if ( empty ( $strEbgsId ) ) {
-            //When the EliteBGS id is not known, we know it hasn't been fetched yet and the caal to API is always made.
-            $strName = $objEntity->name;
-
-            if ( empty( $strName ) ) {
-                $intEddbId = $objEntity->eddbId;
-
-                if ( empty( $intEddbId ) ) {
-                    throw new \Exception( 'The MinorFaction object contains no values recognized as parameters by EliteBGS.' );
-                }
-
-                $strLookupParams = 'eddbId=' . $intEddbId;
-            }
-
-            $strLookupParams = 'name=' . urlencode( $strName );
-        } else {
-            $strLookupParams = 'id=' . $strEbgsId;
-        }
-
-        return $this->loadMinorFaction( $strLookupParams);
-    }
-
-    public function getPresence ( Entity $objEntity ): bool {
-        $objData = $this->getData( $objEntity );
-
-        if ( is_null( $objData ) ) {
-            return false;
-        }
-
-        foreach ($objData->faction_presence as $objPresenceData ) {
-            $objPresence =
-                $objEntity->MinorFactionPresence[ $objPresenceData->{$this->presenceDataIdKey} ]
-                ?? $objEntity->MinorFactionPresence[ $objPresenceData->{$this->presenceDataIdKey} ] = new PresenceEntity();
-            $objPresence->ebgsSystemId = $objPresenceData->system_id;
-            $objPresence->influence = $objPresenceData->influence;
-            $objPresence->updatedOn = $this->getTime( $objData->updated_at );
-        }
-
-        return true;
-    }
-
-    /**
-     *
-     * @param array $arrParams
-     * @throws \Exception
-     */
-    protected function loadMinorFaction ( string $strLookupParams ): ?object {
+    protected function callEliteBgs ( string $strUrlParams ): array {
         /**
          * @var \CodeIgniter\HTTP\CURLRequest $objClient
          * @var \CodeIgniter\HTTP\Response $objResponse
@@ -129,19 +50,155 @@ class EliteBGS
         $objClient = Services::curlrequest();
         $objResponse = $objClient->request(
                 'GET'
-                , $objConfig->strUrlRoot . 'factions?' . $strLookupParams
+                , $objConfig->strUrlRoot . 'factions?' . $strUrlParams
                 );
 
         if ( $objResponse->getStatusCode() < 300 ) {
-            $objResponseBody = json_decode( $objResponse->getBody() );
+            $arrResponse = json_decode(
+                    $objResponse->getBody()
+                    , true
+                    );
+        } else {
+            $arrResponse = [];
+        }
 
-            if ( $objResponseBody->total ) {
-                $objData = $objResponseBody->docs[0];
-                $this->arrMinorFactionData[ $objData->_id ] = $objData;
+        return $arrResponse;
+    }
+
+    /**
+     * (non-PHPdoc)
+     *
+     * @see \App\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface::getMinorFaction()
+     */
+    public function getMinorFaction ( $MinorFaction ): bool    {
+        if ( ! is_array( $MinorFaction ) ) {
+            if ( ! $MinorFaction instanceof Entity) {
+                throw 'Parameter must be of type ' . Entity::class;
+            }
+
+            $MinorFaction = [ $MinorFaction->name => $MinorFaction ];
+        }
+
+        $arrData = $this->getData( $MinorFaction );
+
+        if ( empty( $arrData ) ) {
+            return false;
+        }
+
+        foreach ( $arrData as $arrMinorFaction ) {
+            $arrDoc = $arrMinorFaction[ 'doc' ];
+            /** @var Entity $objEntity */
+            $objEntity = $MinorFaction[ $arrDoc[ 'name' ] ];
+            $objEntity->ebgsId = $arrDoc[ '_id' ];
+            $objEntity->eddbId = $arrDoc[ 'eddb_id' ];
+            $objEntity->allegiance = $arrDoc[ 'allegiance' ];
+            $objEntity->government = $arrDoc[ 'government' ];
+            $objEntity->lastCheckOn = $arrMinorFaction[ 'lastCheckOn' ];
+            $objEntity->name = $arrDoc[ 'name' ];
+            $objEntity->updatedOn = $this->getTime( $arrDoc[ 'updated_at' ] );
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns the JSON object as received from the EliteBGS Factions endpoint.
+     * @param array $objEntity
+     * @throws \Exception
+     * @return array
+     */
+    protected function getData ( $arrMinorFactions ): array {
+        $arrResult = [];
+        $arrParams = [];
+
+        /** @var Entity $objEntity */
+        foreach ( $arrMinorFactions as $objEntity ) {
+            $strName = $objEntity->name;
+
+            if ( isset( $this->data[ $strName ] ) ) {
+                $arrResult[ $strName ] = $this->data[ $strName ];
+            } else {
+                $strKeyValue = $objEntity->ebgsId;
+
+                if ( empty( $strKeyValue ) ) {
+                    $strKeyValue = $objEntity->name;
+
+                    if ( empty( $strKeyValue ) ) {
+                        throw new \Exception( 'The MinorFaction object contains no values recognized as parameters by EliteBGS.' );
+                    } else {
+                        $arrParams[] = 'name=' . urlencode( $strKeyValue );
+                    }
+                } else {
+                    $arrParams[] = 'id=' . urldecode( $strKeyValue );
+                }
             }
         }
 
-        return $objData ?? null;
+        if ( ! empty( $arrParams )) {
+            $strUrlParams = implode(
+                    '&'
+                    , $arrParams
+                    );
+            $intPage = null;
+
+            do {
+                $strFinalUrlParams
+                    =
+                    $strUrlParams
+                    . (
+                            is_null( $intPage )
+                            ? ''
+                            : '&page=' . $intPage
+                            );
+                $arrData = $this->callEliteBgs( $strFinalUrlParams );
+
+                foreach ( $arrData[ 'docs' ] as $arrDoc ) {
+                    $strName = $arrDoc[ 'name' ];
+                    $arrResult[ $strName ] = $this->data[ $strName ] = [
+                            'doc' => $arrDoc
+                            , 'lastCheckOn' => Time::now()
+                            ];
+                }
+
+                $intPage = $arrData[ 'nextPage' ];
+            } while ( ! is_null( $intPage ) );
+        }
+
+        return $arrResult;
+    }
+
+    public function getPresence ( $MinorFaction ): bool {
+        if ( ! is_array( $MinorFaction ) ) {
+            if ( ! $MinorFaction instanceof Entity) {
+                throw 'Parameter must be of type ' . Entity::class;
+            }
+
+            $MinorFaction = [ $MinorFaction->name => $MinorFaction ];
+        }
+
+        $arrData = $this->getData( $MinorFaction );
+
+        if ( empty( $arrData ) ) {
+            return false;
+        }
+
+        foreach ( $arrData as $arrMinorFaction ) {
+            $arrDoc = $arrMinorFaction[ 'doc' ];
+            /** @var Entity $objEntity */
+            $objEntity = $MinorFaction[ $arrDoc[ 'name' ] ];
+
+            foreach ($arrDoc[ 'faction_presence' ] as $arrPresence ) {
+                $strSystemName = $arrPresence[ 'system_name' ];
+                $objPresence =
+                        $objEntity->MinorFactionPresence[ $strSystemName ]
+                        ?? $objEntity->MinorFactionPresence[ $strSystemName ] = new PresenceEntity();
+                $objPresence->ebgsSystemId = $arrPresence[ 'system_id' ];
+                $objPresence->influence = $arrPresence[ 'influence' ];
+                $objPresence->updatedOn = $this->getTime( $arrPresence[ 'updated_at'] );
+            }
+        }
+
+        return true;
     }
 
     /**

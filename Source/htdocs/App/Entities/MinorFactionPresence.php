@@ -5,7 +5,6 @@ namespace App\Entities;
 use Config\Services;
 use App\Models\StarSystem as StarSystemModel;
 */
-use CodeIgniter\Entity\Entity;
 
 /**
  *
@@ -18,7 +17,7 @@ use CodeIgniter\Entity\Entity;
  * @property CodeIgniter\I18n\Time updatedOn
  *
  */
-class MinorFactionPresence extends Base\ExternalEntity
+class MinorFactionPresence extends Base\External
 {
     public ?StarSystem $StarSystem = null;
 /*

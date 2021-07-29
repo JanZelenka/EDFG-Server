@@ -1,21 +1,21 @@
 <?php
 namespace App\Models\Base;
 
-use App\Entities\Base\BaseEntity;
-use CodeIgniter\Model;
-use CodeIgniter\Entity\Entity;
+use App\Entities\Base\Base as BaseEntity;
+use CodeIgniter\Model as SystemModel;
+use CodeIgniter\Entity\Entity as SystemEntity;
 
 /**
  *
  * @author Jan Zelenka <jan.zelenka@telenet.be>
  *
  */
-class BaseModel extends Model
+class Base extends SystemModel
 {
     public function findEntity (
             $key
             , $value = null
-            ): ?Entity
+            ): ?SystemEntity
     {
         if ( empty( $this->returnType ) ) {
             return null;
@@ -40,24 +40,30 @@ class BaseModel extends Model
     public function newFromResultRow (
             array $arrRow
             , string $strFieldPrefix
-            , string $strExternalKey
+            , ?string $strExternalKey = null
             , ?array $arrLoadedEntities = null
             ): ?BaseEntity
     {
-        $varId = $arrRow[ $strFieldPrefix . $strExternalKey ];
+        if ( ! is_null( $arrLoadedEntities ) ) {
+            if ( is_null( $strExternalKey ) ) {
+                return null;
+            }
 
-        if ( empty( $varId ) ) {
-            return null;
+            $varId = $arrRow[ $strFieldPrefix . $strExternalKey ];
         }
 
-        /** @var Entity $objEntity */
+        /** @var BaseEntity $objEntity */
         $objEntity = new $this->returnType();
         $objEntity->fillFromResultRow(
                 $arrRow
                 , $strFieldPrefix
                 );
 
-        if ( ! is_null( $arrLoadedEntities ) ) {
+        if (
+                ! is_null( $arrLoadedEntities )
+                 &&
+                ! empty( $varId ) )
+        {
             $arrLoadedEntities[ $varId ] = $objEntity;
         }
 
@@ -81,7 +87,7 @@ class BaseModel extends Model
             if ($response !== false)
             {
                 if (
-                        $data instanceof Entity
+                        $data instanceof BaseEntity
                          &&
                         ! empty( $this->primaryKey )
                         )

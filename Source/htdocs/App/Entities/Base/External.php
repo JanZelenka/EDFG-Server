@@ -11,7 +11,7 @@ use CodeIgniter\I18n\Time;
  * @property Time lastCheckOn
  * @property Time updatedOn
  */
-class ExternalEntity extends BaseEntity
+class External extends Base
 {
     public function __construct ( array $data = null ) {
         parent::__construct( $data );
@@ -31,6 +31,17 @@ class ExternalEntity extends BaseEntity
             $this->isCheckExpired();
     }
 
+    public function checkExpiryInterval ( int $intOffset = 0): \DateInterval {
+        $objAppConfig = config( 'App' );
+        $objLastCheckExpiryInterval = new \DateInterval( 'PT' . ( $objAppConfig->ExternalCheckExpiryPeriod + $intOffset ) . 'S' );
+        $objLastCheckExpiryInterval->invert = 1;
+        return $objLastCheckExpiryInterval;
+    }
+
+    public function expireCheck () {
+        $this->lastCheckOn = Time::now()->add( $this->checkExpiryInterval( 1 ) );
+    }
+
     /**
      * Determins whether the last check for fresh External Catalogue data has expired.
      *
@@ -43,10 +54,7 @@ class ExternalEntity extends BaseEntity
             return true;
         }
 
-        $objAppConfig = config( 'App' );
-        $objLastCheckExpiryInterval = new \DateInterval( 'PT' . ( $objAppConfig->ExternalCheckExpiryPeriod ) . 'S' );
-        $objLastCheckExpiryInterval->invert = 1;
-        return $dtmLastCheckOn < ( Time::now()->add( $objLastCheckExpiryInterval ) );
+        return $dtmLastCheckOn < ( Time::now()->add( $this->checkExpiryInterval() ) );
     }
 
     /**

@@ -11,7 +11,7 @@ use CodeIgniter\I18n\Time;
  *
  * @property string ebgsId
  */
-class BgsTick extends Base\ExternalEntity
+class BgsTick extends Base\External
 {
     public static function refreshTick() {
         /** @var Model $objModel */

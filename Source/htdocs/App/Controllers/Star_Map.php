@@ -10,7 +10,7 @@ class Star_Map extends Base\TickSensitive
 
 	public function show_minor_faction ( $identifier ) {
 	    /** @var \App\Entities\MinorFaction $objMinorFaction */
-	    $objMinorFaction = model( MinorFactionModel::class )->findEntityStarSystems(
+	    $objMinorFaction = model( MinorFactionModel::class )->findEntity(
 	            'name'
 	            , $identifier
 	            );

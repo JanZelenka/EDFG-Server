@@ -36,7 +36,7 @@ class EliteBGS
                 , $objConfig->strUrlRoot . 'systems?' . $strUrlParams
                 );
 
-        if ($objResponse->getStatusCode() < 300 ) {
+        if ( $objResponse->getStatusCode() < 300 ) {
             return json_decode(
                     $objResponse->getBody()
                     , true
@@ -46,60 +46,97 @@ class EliteBGS
         }
     }
 
-    public function getMinorFactionStarSystems ( MinorFactionEntity $objMinorFaction ): bool {
-        $strId = $objMinorFaction->ebgsId;
+    public function getMinorFactionStarSystems ( $MinorFaction ): bool {
+        if ( ! is_array( $MinorFaction ) ) {
+            if ( ! $MinorFaction instanceof MinorFactionEntity) {
+                throw 'Parameter must be of type ' . MinorFactionEntity::class;
+            }
 
-        if ( ! empty( $strId ) ) {
-            $strUrlParams = 'factionId=' . urlencode( $strId );
-        } else {
-            $strId = $objMinorFaction->name;
+            $MinorFaction = [ $MinorFaction->name => $MinorFaction ];
+        }
 
-            if ( ! empty( $strId ) ) {
-                $strUrlParams = 'faction=' . urlencode( $strId );
+        $arrParams = [];
+
+        /** @var MinorFactionEntity $objMinorFaction */
+        foreach ($MinorFaction as $objMinorFaction) {
+            if ( ! $objMinorFaction instanceof MinorFactionEntity) {
+                throw 'Parameter array must be exclusively of type ' . MinorFactionEntity::class;
+            }
+
+            $strKey = $objMinorFaction->ebgsId;
+
+            if ( ! empty( $strKey ) ) {
+                $arrParams[] = 'factionId=' . urlencode( $strKey );
+            } else {
+                $strKey = $objMinorFaction->name;
+
+                if ( ! empty( $strKey ) ) {
+                    $arrParams[] = 'faction=' . urlencode( $strKey );
+                } else {
+                    throw new \Exception( 'No recognized parameters specified.' );
+                }
             }
         }
 
-        if ( ! isset ( $strUrlParams ) ) {
-            throw new \Exception( 'No recognized parameter specified.' );
-        }
+        $strUrlParams = implode(
+                '&'
+                , $arrParams
+                );
 
         $intPage = null;
         /** @var Model $objModel */
         $objModel = model( Model::class );
 
         do {
-            $strFinalUrlParams = $strUrlParams . ( $intPage ?? '' );
+            $strFinalUrlParams
+                =
+                $strUrlParams
+                . (
+                        is_null( $intPage )
+                        ? ''
+                        : '&page=' . $intPage
+                        );
             $arrData = $this->callEliteBgs( $strFinalUrlParams );
 
             foreach ( $arrData[ 'docs' ] as $arrStarSystem) {
-                /** @var PresenceEntity $objPresence */
-                $objPresence = $objMinorFaction->MinorFactionPresence[ $arrStarSystem[ '_id' ] ] ?? null;
+                foreach ( $arrStarSystem[ 'factions' ] as $arrMinorfaction ) {
+                    $objMinorFaction = $MinorFaction[ $arrMinorfaction[ 'name' ] ] ?? null;
 
-                if ( ! is_null( $objPresence ) ) {
-                    /*
-                     * We get null here only if Elite BGS receives star system update with new Minor Faction Presence
-                     * just after we queried teh Minor Faction and before we queried Star System. So pretty much never
-                     * but you know how it goes...
-                     */
+                    if ( ! is_null( $objMinorFaction ) ) {
+                        /** @var PresenceEntity $objPresence */
+                        $objPresence = $objMinorFaction->MinorFactionPresence[ $arrStarSystem[ 'name' ] ] ?? null;
 
-                    $objEntity = $objPresence->StarSystem;
+                        if ( is_null( $objPresence ) ) {
+                            /*
+                             * We get null here only if Elite BGS receives star system update with new Minor Faction Presence
+                             * just after we queried teh Minor Faction and before we queried Star System. So pretty much never
+                             * but you know how it goes...
+                             */
+                            $objMinorFaction->expireCheck();
+                        } else {
+                            $objEntity = $objPresence->StarSystem;
 
-                    if ( is_null( $objEntity ) ) {
-                        $objEntity =
-                            $objModel->loadedStarSystems[ $arrStarSystem[ '_id' ] ]
-                            ?? $objModel->loadedStarSystems[ $arrStarSystem[ '_id' ] ] = new Entity();
-                        $objPresence->StarSystem = $objEntity;
+                            if ( is_null( $objEntity ) ) {
+                                $objEntity =
+                                $objModel->loadedStarSystems[ $arrStarSystem[ 'name' ] ]
+                                ?? $objModel->loadedStarSystems[ $arrStarSystem[ 'name' ] ] = new Entity();
+                                $objPresence->StarSystem = $objEntity;
+                            }
+
+                            $this->setEntityData(
+                                    $objEntity
+                                    , $arrStarSystem
+                                    , true
+                                    );
+                        }
                     }
-
-                    $this->setEntityData(
-                            $objEntity
-                            , $arrStarSystem
-                            );
                 }
             }
 
             $intPage = $arrData[ 'nextPage' ];
         } while ( ! is_null( $intPage ) );
+
+        return true;
     }
 
     /**
@@ -162,7 +199,8 @@ class EliteBGS
 
     protected function setEntityData(
             Entity $objEntity
-            , object $arrData
+            , array $arrData
+            , bool $blnNoFactions = false
             )
     {
         $objEntity->allegiance = $arrData[ 'allegiance' ];
@@ -179,18 +217,23 @@ class EliteBGS
         $objEntity->security = $arrData[ 'security' ];
         $objEntity->state = $arrData[ 'state' ];
         $objEntity->updatedOn = $this->getTime( $arrData[ 'updated_at' ] );
+
+        if ( $blnNoFactions ) {
+            return;
+        }
+
         /** @var MinorFactionModel $objMinorFactionModel */
         $objMinorFactionModel = model( MinorFactionModel::class );
 
         foreach ($arrData[ 'factions' ] as $arrFactionData ) {
             /** @var MinorFactionEntity $objMinorFactionEntity */
-            $strMinorFactionId = $arrFactionData[ 'faction_id' ];
-            $objEntity->MinorFactions[ $strMinorFactionId ] =
-                $objMinorFactionModel->loadedMinorFactions[ $strMinorFactionId ]
-                ?? $objMinorFactionModel->loadedMinorFactions[ $strMinorFactionId ] = new MinorFactionEntity( [
-                        'ebgsId' => $strMinorFactionId
-                        , 'name' => $arrFactionData[ 'name' ]
-                        ]);
+            $strMinorFactionKey = $arrFactionData[ 'name' ];
+            $objEntity->MinorFactions[ $strMinorFactionKey ] =
+                    $objMinorFactionModel->loadedMinorFactions[ $strMinorFactionKey ]
+                    ?? $objMinorFactionModel->loadedMinorFactions[ $strMinorFactionKey ] = new MinorFactionEntity( [
+                            'ebgsId' => $arrFactionData[ 'faction_id' ]
+                            , 'name' => $arrFactionData[ 'name' ]
+                            ]);
         }
     }
 }

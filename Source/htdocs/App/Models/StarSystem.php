@@ -12,8 +12,8 @@ use Config\Services;
  * @author Jan Zelenka <jan.zelenka@telenet.be>
  *
  */
-final class StarSystem extends Base\ExternalDataModel {
-    protected array $allowedFields = [
+final class StarSystem extends Base\ExternalData {
+    protected $allowedFields = [
             'allegiance'
             , 'coordX'
             , 'coordY'
@@ -27,50 +27,27 @@ final class StarSystem extends Base\ExternalDataModel {
             , 'security'
             , 'state'
            ];
-    public array $loadedStarSystems = [];
-    protected string $primaryKey = 'id';
-    protected string $returnType = Entity::class;
-    protected string $table = 'star_system';
-    protected bool $useSoftDeletes = false;
+    public $loadedStarSystems = [];
+    protected $primaryKey = 'id';
+    protected $returnType = Entity::class;
+    protected $table = 'star_system';
+    protected $useSoftDeletes = false;
 
 
-    public function findStarSystemEntities (
-            $key
-            , $value = null
-            ): Entity
-    {
-        if ( empty( $this->returnType ) ) {
-            return null;
-        }
-
-        if ( ! is_array( $key ) )
-        {
-            $key = [$key => $value];
-        }
-
+    public function findMinorFactions ( Entity $objEntity ): bool {
+        $strPresencePrefix = 'mfp_';
         /** @var \CodeIgniter\Database\ResultInterface $objResult */
         $objResult = $this->db
             ->table( 'star_system_minor_factions_view' )
-            ->where( $key )
+            ->where( [ $strPresencePrefix. 'starSystemId' => $objEntity->id ] )
             ->get();
 
         $arrResult = $objResult->getResultArray();
 
         if ( ! count( $arrResult ) ) {
-            return new Entity( $key );
+            return false;
         }
 
-        $strPrefix = 'sts_';
-        $objEntity = $this->newFromResultRow(
-                $arrResult[ 0 ]
-                , $strPrefix
-                );
-
-        if ( is_null( $objEntity ) ) {
-            return new Entity( $key );
-        }
-
-        $strPresencePrefix = 'mfp_';
         $strMinorFactionPrefix = 'mfc_';
         /** @var MinorFactionPresence $objPresenceModel */
         $objPresenceModel = model( MinorFactionPresence::class );
@@ -80,40 +57,31 @@ final class StarSystem extends Base\ExternalDataModel {
          * @var PresenceEntity $objPresenceEntity
          * @var MinorFactionEntity $objMinorFactionEntity
          */
-        $objPresenceEntity = $objMinorFactionEntity = null;
-        $objMinorFactionCatalogue = Services::minorFactionCatalogue();
-        $strPresenceKey = $objMinorFactionCatalogue->externalPresenceKey();
-        $strMinorFactionKey = $objMinorFactionCatalogue->externalKey();
 
         if ( is_null( $objEntity->MinorFactions ) ) {
             $objEntity->MinorFactions = [];
         }
 
         foreach ( $arrResult as $arrRow ) {
-            if ( $objEntity->id != $arrRow[ $strPrefix . 'id' ] ) {
-                // Finding only one Entity, there should never be more in the result.
-                break;
-            }
-
             $objMinorFactionEntity = $objMinorFactionModel->newFromResultRow(
                     $arrRow
                     , $strMinorFactionPrefix
                     );
 
             if ( ! is_null( $objMinorFactionEntity ) ) {
-                $objEntity->MinorFactions[ $objMinorFactionEntity->{$strMinorFactionKey} ] = $objMinorFactionEntity;
+                $objEntity->MinorFactions[ $objMinorFactionEntity->name ] = $objMinorFactionEntity;
                 $objPresenceEntity = $objPresenceModel->newFromResultRow(
                         $arrRow
                         , $strPresencePrefix
                         );
 
                 if ( ! is_null( $objPresenceEntity ) ) {
-                    $objMinorFactionEntity->MinorFactionPresence[ $objPresenceEntity->{$strPresenceKey} ] = $objPresenceEntity;
+                    $objMinorFactionEntity->MinorFactionPresence[ $objEntity->name ] = $objPresenceEntity;
                 }
             }
         }
 
-        return $objEntity;
+        return true;
     }
     /**
      * Creates the Return object populated with data from other source than the native table.
@@ -126,13 +94,15 @@ final class StarSystem extends Base\ExternalDataModel {
     public function newFromResultRow (
             array $arrRow
             , string $strFieldPrefix
+            , ?string $strExternalKey = null
+            , ?array $arrLoadedEntities = null
             ): ?Entity
     {
         return parent::newFromResultRow(
                 $arrRow
                 , $strFieldPrefix
-                , Services::starSystemCatalogue()->externalKey()
-                , $this->loadedStarSystems
+                , $strExternalKey ?? 'name'
+                , $arrLoadedEntities ?? $this->loadedStarSystems
                 );
     }
 }

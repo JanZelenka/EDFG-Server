@@ -17,7 +17,7 @@ helper( 'deployment' );
 	<link rel="manifest" href="/manifest.json"></link>
 	<meta name="theme-color" content="#ffffff"></meta>
 
-	<title><?= $pageTitle ?? lang( 'Navigation.pageTitleDefault' ) ?></title>
+	<title><?= $pageTitle ?? lang( 'Site.title' ) ?></title>
 	<?= $this->include( 'Include/standard_css' ) ?>
 	<?= $this->renderSection( 'styles') ?>
 </head>

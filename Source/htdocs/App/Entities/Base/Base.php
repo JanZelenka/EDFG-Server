@@ -1,7 +1,7 @@
 <?php
 namespace App\Entities\Base;
 
-use CodeIgniter\Entity\Entity;
+use CodeIgniter\Entity\Entity as SystemEntity;
 
 /**
  *
@@ -13,7 +13,7 @@ use CodeIgniter\Entity\Entity;
  * @property string zzzModifiedBy
  * @property \CodeIgniter\I18n\Time zzzModifiedOn
  */
-class BaseEntity extends Entity
+class Base extends SystemEntity
 {
     public function __construct ( array $data = null ) {
         parent::__construct( $data );
@@ -33,7 +33,7 @@ class BaseEntity extends Entity
         $intPrefixLength = strlen( $strFieldPrefix );
 
         foreach ($arrRow as $strField => $varValue) {
-            if ( substr( $strField, 0, $intPrefixLength ) = $strFieldPrefix ) {
+            if ( substr( $strField, 0, $intPrefixLength ) === $strFieldPrefix ) {
                 $this->{substr( $strField, $intPrefixLength )} = $varValue;
             }
         }

@@ -1,8 +1,7 @@
 <?php
 namespace App\Models;
 
-use Config\Services;
-use App\Entities\MinorFaction as MinorFactionEntity;
+use App\Entities\Base\Base as BaseEntity;
 use App\Entities\MinorFactionPresence as Entity;
 use App\Models\StarSystem as StarSystemModel;
 
@@ -11,7 +10,7 @@ use App\Models\StarSystem as StarSystemModel;
  * @author Jan Zelenka <jan.zelenka@clickworks.eu>
  *
  */
-class MinorFactionPresence extends Base\ExternalDataModel
+class MinorFactionPresence extends Base\ExternalData
 {
     protected $table = 'minor_faction_presence';
     protected $primaryKey = 'id';
@@ -51,21 +50,22 @@ class MinorFactionPresence extends Base\ExternalDataModel
     public function newFromResultRow (
             array $arrRow
             , string $strFieldPrefix
-            ): Entity
+            , ?string $strExternalKey = null
+            , ?array $arrLoadedEntities = null
+            ): ?BaseEntity
     {
         return parent::newFromResultRow(
                 $arrRow
                 , $strFieldPrefix
-                , Services::minorFactionCatalogue()->externalPresenceKey()
                 );
     }
 
     /**
      *
      * {@inheritDoc}
-     * @see \App\Models\Base\ExternalDataModel::save()
+     * @see \App\Models\Base\ExternalData::save()
      */
-    public function save( $MinorFactionPresence ): bool {
+    public function save( $MinorFactionPresence = null ): bool {
         if ( $MinorFactionPresence instanceof Entity ) {
             /** @var \App\Entities\MinorFactionPresence $MinorFactionPresence */
             if ( ! is_null( $MinorFactionPresence->StarSystem ) ) {

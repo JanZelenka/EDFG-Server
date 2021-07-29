@@ -4,9 +4,6 @@ namespace App\Entities;
 
 use Config\Services;
 use App\Models\MinorFaction as Model;
-use App\Models\MinorFactionPresence as PresenceModel;
-use App\Models\StarSystem as StarSystemModel;
-use CodeIgniter\I18n\Time;
 
 /**
  *
@@ -18,7 +15,7 @@ use CodeIgniter\I18n\Time;
  * @property string government
  * @property string name
  */
-class MinorFaction extends Base\ExternalEntity
+class MinorFaction extends Base\External
 {
     /**
      * Array of al the Minor Faction Presence records for Minor Faction.
@@ -30,6 +27,8 @@ class MinorFaction extends Base\ExternalEntity
         /**
          * @var \App\Entities\MinorFactionPresence $objPresence
          */
+
+        model( Model::class )->findPresence( $this );
 
         if ( ! $this->isCheckExpired() ) {
             return;

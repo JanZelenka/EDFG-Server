@@ -35,14 +35,13 @@ class EliteBGS
                     $objResponse->getBody()
                     , true
                     );
+            $arrTickData = $arrData[ 0 ];
 
-            if ( $arrData[ 0 ][ '_id' ] !== $objBgsTick->ebgsId ) {
-                $objBgsTick->
-                $objOccuredOn = $this->getTime( $arrData[ 0 ][ 'time' ] );
-                $objBgsTick = new BgsTick(
-                        $objResponseBody[0]->_id
-                        , $objOccuredOn
-                        );
+            if ( $arrTickData[ '_id' ] !== $objBgsTick->ebgsId ) {
+                $objBgsTick = new BgsTick( [
+                        'ebgsId' => $arrTickData[ '_id' ]
+                        , 'updatedOn' => $this->getTime( $arrTickData[ 'time' ] )
+                        ] );
             }
 
             $objBgsTick->lastCheckOn = Time::now();

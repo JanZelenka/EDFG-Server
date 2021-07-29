@@ -2,7 +2,7 @@
 
 namespace App\Models\Base;
 
-use App\Entities\Base\ExternalEntity;
+use App\Entities\Base\External as ExternalEntity;
 use CodeIgniter\Database\ConnectionInterface;
 use CodeIgniter\Validation\ValidationInterface;
 
@@ -11,7 +11,7 @@ use CodeIgniter\Validation\ValidationInterface;
  * @author Jan Zelenka <jan.zelenka@telenet.be>
  *
  */
-class ExternalDataModel extends StampedModel {
+class ExternalData extends Stamped {
     /**
      *
      */
@@ -25,7 +25,7 @@ class ExternalDataModel extends StampedModel {
         $this->allowedFields[] = 'updatedOn';
     }
 
-    public function save ( $data ) {
+    public function save ( $data = null ): bool {
         if (
                 ! $data instanceof ExternalEntity
                  ||

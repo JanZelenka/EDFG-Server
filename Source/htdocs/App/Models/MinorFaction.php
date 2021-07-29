@@ -1,17 +1,18 @@
 <?php
 namespace App\Models;
 
-use Config\Services;
+use App\Entities\Base\Base as BaseEntity;
 use App\Entities\MinorFaction as Entity;
 use App\Entities\MinorFactionPresence as PresenceEntity;
 use App\Entities\StarSystem as StarSystemEntity;
+use CodeIgniter\Entity\Entity as SystemEntity;
 
 /**
  *
  * @author Jan Zelenka <jan.zelenka@clickworks.eu>
  *
  */
-final class MinorFaction extends Base\ExternalDataModel
+final class MinorFaction extends Base\ExternalData
 {
     protected $allowedFields = [
             'ebgsId'
@@ -20,7 +21,7 @@ final class MinorFaction extends Base\ExternalDataModel
             , 'government'
             , 'name'
     ];
-    public array $loadedMinorFactions = [];
+    public $loadedMinorFactions = [];
     protected $primaryKey = 'id';
     protected $returnType = Entity::class;
     protected $table = 'minor_faction';
@@ -29,59 +30,35 @@ final class MinorFaction extends Base\ExternalDataModel
     public function findEntity(
             $key
             , $value = null
-            )
+            ): ?SystemEntity
     {
         $objEntity = parent::findEntity(
                 $key
-                , value
+                , $value
                 );
-        $strExternalKey = Services::minorFactionCatalogue()->externalKey();
-        $varKeyValue = $objEntity->{$strExternalKey};
+        $strName = $objEntity->name;
 
-        if ( ! empty( $varKeyValue ) ) {
-            $this->loadedMinorFactions[ $varKeyValue ] = $objEntity;
+        if ( ! empty( $strName ) ) {
+            $this->loadedMinorFactions[ $strName ] = $objEntity;
         }
 
         return $objEntity;
     }
 
-    public function findEntityStarSystems (
-            $key
-            , $value = null
-            ): Entity
-    {
-        if ( empty( $this->returnType ) ) {
-            return null;
-        }
-
-        if ( ! is_array( $key ) )
-        {
-            $key = [$key => $value];
-        }
-
+    public function findPresence ( Entity $objEntity ): bool {
+        $strPresencePrefix = 'mfp_';
         /** @var \CodeIgniter\Database\ResultInterface $objResult */
         $objResult = $this->db
-            ->table( 'minor_faction_star_system_view' )
-            ->where( $key )
+            ->table( 'minor_faction_star_systems_view' )
+            ->where( [ $strPresencePrefix . 'minorFactionId' => $objEntity->id ] )
             ->get();
 
         $arrResult = $objResult->getResultArray();
 
         if ( ! count( $arrResult ) ) {
-            return new Entity( $key );
+            return false;
         }
 
-        $strPrefix = 'mfc_';
-        $objEntity = $this->newFromResultRow(
-                $arrResult[ 0 ]
-                , $strPrefix
-                );
-
-        if ( is_null( $objEntity ) ) {
-            return new Entity( $key );
-        }
-
-        $strPresencePrefix = 'mfp_';
         $strStarSystemPrefix = 'sts_';
         /** @var MinorFactionPresence $objPresenceModel */
         $objPresenceModel = model( MinorFactionPresence::class );
@@ -91,46 +68,41 @@ final class MinorFaction extends Base\ExternalDataModel
          * @var PresenceEntity $objPresenceEntity
          * @var StarSystemEntity $objStarSystemEntity
          */
-        $objPresenceEntity = $objStarSystemEntity = null;
-        $strPresenceKey = Services::minorFactionCatalogue()->externalPresenceKey();
 
         if ( is_null( $objEntity->MinorFactionPresence ) ) {
             $objEntity->MinorFactionPresence = [];
         }
 
         foreach ( $arrResult as $arrRow ) {
-            if ( $objEntity->id != $arrRow[ $strPrefix . 'id' ] ) {
-                // Finding only one Entity, there should never be more in the result.
-                break;
-            }
-
             $objPresenceEntity = $objPresenceModel->newFromResultRow(
                     $arrRow
                     , $strPresencePrefix
                     );
 
             if ( ! is_null( $objPresenceEntity ) ) {
-                $objEntity->StarSystem = $objStarSystemModel->newFromResultRow(
+                $objPresenceEntity->StarSystem = $objStarSystemModel->newFromResultRow(
                         $arrRow
                         , $strStarSystemPrefix
                         );
-                $objEntity->MinorFactionPresence[ $objPresenceEntity->{$strPresenceKey} ] = $objPresenceEntity;
+                $objEntity->MinorFactionPresence[ $objPresenceEntity->StarSystem->name ] = $objPresenceEntity;
             }
         }
 
-        return $objEntity;
+        return true;
     }
 
     public function newFromResultRow (
             array $arrRow
             , string $strFieldPrefix
-            ): ?Entity
+            , ?string $strExternalKey = null
+            , ?array $arrLoadedEntities = null
+            ): ?BaseEntity
     {
         return parent::newFromResultRow(
                 $arrRow
                 , $strFieldPrefix
-                , Services::minorFactionCatalogue()->externalKey()
-                , $this->loadedMinorFactions
+                , $strExternalKey ?? 'name'
+                , $arrLoadedEntities ?? $this->loadedMinorFactions
                 );
     }
 
@@ -139,7 +111,7 @@ final class MinorFaction extends Base\ExternalDataModel
      * {@inheritDoc}
      * @see \CodeIgniter\BaseModel::save()
      */
-    public function save ( $MinorFaction ): bool {
+    public function save ( $MinorFaction = null ): bool {
         /**
          * @var \App\Entities\MinorFaction $MinorFaction
          * @var \App\Entities\MinorFactionPresence $objPresenceEntity
@@ -163,6 +135,8 @@ final class MinorFaction extends Base\ExternalDataModel
                 $objPresenceModel->save( $objPresenceEntity );
             }
         }
+
+        return $blnSuccess;
     }
 }
 

@@ -2,7 +2,6 @@
 namespace App\Entities;
 
 use Config\Services;
-use App\Models\MinorFaction as MinorFactionModel;
 use App\Models\StarSystem as Model;
 
 /**
@@ -22,7 +21,7 @@ use App\Models\StarSystem as Model;
  * @property string security
  * @property string state
  */
-class StarSystem extends Base\ExternalEntity
+class StarSystem extends Base\External
 {
     /** @var ?array \App\Entities\MinorFactionPresence */
     public ?array $MinorFactions = null;
@@ -33,10 +32,10 @@ class StarSystem extends Base\ExternalEntity
      * or we already have data from after the last detected BGS Tick.
      */
     public function synchronize () {
-        /** @var \Config\App $objAppConfig */
-        /** @var \App\Libraries\StarSystemCatalogue\StarSystemCatalogueInterface $objCatalogue */
+        model( Model::class )->findMinorFactions ( $this );
 
         if ( $this->canSynchronize() ) {
+            /** @var \App\Libraries\StarSystemCatalogue\StarSystemCatalogueInterface $objCatalogue */
             $objCatalogue = Services::starSystemCatalogue();
 
             if ( $objCatalogue->getStarSystem( $this ) ) {

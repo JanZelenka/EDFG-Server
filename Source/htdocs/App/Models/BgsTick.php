@@ -8,7 +8,7 @@ use App\Entities\BgsTick as Entity;
  * @author Jan Zelenka <jan.zelenka@telenet.be>
  *
  */
-class BgsTick extends Base\ExternalDataModel
+class BgsTick extends Base\ExternalData
 {
     protected $table = 'bgs_tick';
     protected $primaryKey = 'id';
@@ -25,7 +25,7 @@ class BgsTick extends Base\ExternalDataModel
             $this->LastBgsTick
             ?? $this->LastBgsTick = $this
                 ->limit( 1 )
-                ->orderBy( 'occuredOn', 'desc' )
+                ->orderBy( 'updatedOn', 'desc' )
                 ->first()
             ?? $this->LastBgsTick = new Entity();
     }

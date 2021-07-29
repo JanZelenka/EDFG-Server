@@ -11,7 +11,7 @@ use CodeIgniter\Validation\ValidationInterface;
  * @author Jan Zelenka <jan.zelenka@telenet.be>
  *
  */
-class StampedModel extends BaseModel {
+class Stamped extends Base {
     /**
      *
      */

@@ -1,5 +1,6 @@
 <?php
 /**
+ * @var \App\Entities\MinorFaction $objMinorFaction
  * @var \App\Entities\StarSystem $objStarSystem
  * @var \CodeIgniter\View\View $this
  * @var array $arrStarSystems
@@ -27,7 +28,7 @@ foreach ($arrStarSystems as $objStarSystem) {?>
         <transform translation="<?= translateCoords( $objStarSystem->coordX, $objStarSystem->coordY, $objStarSystem->coordZ) ?>">
             <shape>
                 <appearance>
-                    <material diffuseColor="<?= starSystemInfluenceColor( $objStarSystem->MinorFactions[ $objMinorFaction->id ]->influence )?>" />
+                    <material diffuseColor="<?= starSystemInfluenceColor( $objMinorFaction->MinorFactionPresence[ $objStarSystem->name ]->influence )?>" />
                 </appearance>
                 <sphere radius="0.5" />
             </shape>
