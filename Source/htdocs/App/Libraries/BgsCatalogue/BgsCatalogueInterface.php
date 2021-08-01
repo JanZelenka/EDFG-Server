@@ -10,6 +10,6 @@ use App\Entities\BgsTick;
  */
 interface BgsCatalogueInterface
 {
-    public function getLastTick ( BgsTick $objBgsTick ): BgsTick;
+    public static function getLastTick ( BgsTick $objBgsTick ): BgsTick;
 }
 

@@ -3,9 +3,6 @@
 namespace Config;
 
 use CodeIgniter\Config\BaseService;
-use App\Libraries\BgsCatalogue;
-use App\Libraries\MinorFactionCatalogue;
-use App\Libraries\StarSystemCatalogue;
 use App\Libraries\Session;
 
 /**
@@ -32,46 +29,6 @@ class Services extends BaseService
 	//
 	//     return new \CodeIgniter\Example();
 	// }
-
-	public static function bgsCatalogue ( $blnGetShared = true ): BgsCatalogue\BgsCatalogueInterface {
-	    if ( $blnGetShared )
-	        return static::getSharedInstance( 'bgsCatalogue' );
-
-        /** @var \Config\App $objAppConfig */
-        $objAppConfig = config( 'App' );
-        $strClassName = $objAppConfig->BgsCatalogue;
-        return new $strClassName();
-	}
-	/**
-	 *
-	 * @param boolean $blnGetShared
-	 * @return \App\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface
-	 */
-	public static function minorFactionCatalogue ( $blnGetShared = true ): MinorFactionCatalogue\MinorFactionCatalogueInterface {
-	    if ( $blnGetShared )
-	        return static::getSharedInstance( 'minorFactionCatalogue' );
-
-        /** @var \Config\App $objAppConfig */
-        $objAppConfig = config( 'App' );
-        $strClassName = $objAppConfig->MinorFactionCatalogue;
-        return new $strClassName();
-}
-
-
-	/**
-	 *
-	 * @param boolean $blnGetShared
-	 * @return \App\Libraries\StarSystemCatalogue\StarSystemCatalogueInterface
-	 */
-    public static function starSystemCatalogue ( $blnGetShared = true ): StarSystemCatalogue\StarSystemCatalogueInterface {
-        if ( $blnGetShared )
-            return static::getSharedInstance( 'starSystemCatalogue' );
-
-        /** @var \Config\App $objAppConfig */
-        $objAppConfig = config( 'App' );
-        $strClassName = $objAppConfig->StarSystemCatalogue;
-        return new $strClassName();
-}
 
     public static function session(
             App $config = null
@@ -100,5 +57,4 @@ class Services extends BaseService
 
         return $session;
     }
-
 }

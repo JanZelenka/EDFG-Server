@@ -8,7 +8,7 @@ function (
 	    , undefined
 	    )
 {
-    // Atempts to set the language and in case of a success refreshes the page.
+    // Attempts to set the language and in case of a success refreshes the page.
     factionGuard.setLanguage = function () {
         const objData = axios.create();
         const strLocale = $( this ).attr( 'data-language' );

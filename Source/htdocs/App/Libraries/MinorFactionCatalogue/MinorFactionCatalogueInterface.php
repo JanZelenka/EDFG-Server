@@ -13,13 +13,13 @@ interface MinorFactionCatalogueInterface
      * @param array|\App\Entities\MinorFaction $MinorFaction
      * @return bool
      */
-    public function getMinorFaction ( $MinorFaction ): bool;
+    public static function getMinorFaction ( $MinorFaction ): bool;
 
     /**
      *
      * @param array|\App\Entities\MinorFaction $objMinorFaction
      * @return bool
      */
-    public function getPresence ( $MinorFaction ): bool;
+    public static function getPresence ( $MinorFaction ): bool;
 }
 

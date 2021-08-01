@@ -4,6 +4,8 @@ namespace App\Entities;
 
 use Config\Services;
 use App\Models\MinorFaction as Model;
+use App\Models\StarSystem as StarSystemModel;
+use App;
 
 /**
  *
@@ -34,7 +36,10 @@ class MinorFaction extends Base\External
             return;
         }
 
-        $objCatalogue = Services::minorFactionCatalogue();
+        /** @var \Config\App $objAppConfig */
+        $objAppConfig = config( 'App' );
+        /** @var App\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface $objCatalogue */
+        $objCatalogue = new $objAppConfig->MinorFactionCatalogue();
 
         if ( ! $objCatalogue->getMinorFaction( $this ) ) {
             return;
@@ -44,7 +49,46 @@ class MinorFaction extends Base\External
             throw \Exception( 'Synchronizing Minor Faction Presence has failed to retrieve data from the Minor Faction Catalogue.');
         }
 
-        Services::starSystemCatalogue()->getMinorFactionStarSystems( $this );
+        $objStarSystemCatalogue = new $objAppConfig->StarSystemCatalogue();
+        $objStarSystemCatalogue->getMinorFactionStarSystems( $this );
+        $arrNewStarNames = [];
+        /** @var \App\Entities\MinorFactionPresence $objPresence */
+        foreach ( $this->MinorFactionPresence as $objPresence) {
+            if ( empty( $objPresence->StarSystem->id ) ) {
+                $arrNewStarNames[] = $objPresence->StarSystem->name;
+            }
+
+            if ( empty( $objPresence->StarSystem->mainStarClass ) ) {
+                /** @var App\Libraries\StarSystemCatalogue\StarSystemCatalogueInterface $objMainStarInfoCatalogue */
+                if ( empty( $objMainStarInfoCatalogue ) ) {
+                    $objMainStarInfoCatalogue = new $objAppConfig->MainStarInfoCatalogue();
+                }
+
+                $objMainStarInfoCatalogue->getStarSystem( $objPresence->StarSystem );
+            }
+        }
+
+        if ( ! empty( $arrNewStarNames ) ) {
+            /** @var \App\Models\StarSystem $objStarSystemModel */
+            $objStarSystemModel = model( StarSystemModel::class );
+            $objResult = $objStarSystemModel
+                ->whereIn(
+                        'name'
+                        , $arrNewStarNames
+                        )
+                ->get();
+            $arrResult = $objResult->getResultArray();
+
+            if ( count( $arrResult ) ) {
+                foreach ( $arrResult as $arrRow) {
+                    $this->MinorFactionPresence[ $arrRow[ 'name' ] ]->StarSystem = $objStarSystemModel->newFromResultRow(
+                            $arrRow
+                            , ''
+                            );
+                }
+            }
+        }
+
         model( Model::class )->save( $this );
     }
 }

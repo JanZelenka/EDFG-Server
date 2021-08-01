@@ -4,9 +4,11 @@ namespace App\Controllers;
 
 use App\Models\MinorFaction as MinorFactionModel;
 use App\Models\StarSystem as StarSystemModel;
+use CodeIgniter\API\ResponseTrait;
 
 class Star_Map extends Base\TickSensitive
 {
+    use ResponseTrait;
 
 	public function show_minor_faction ( $identifier ) {
 	    /** @var \App\Entities\MinorFaction $objMinorFaction */
@@ -47,11 +49,15 @@ class Star_Map extends Base\TickSensitive
 	}
 
 	public function star_system ( $intId ) {
+	    /** @var StarSystemModel $objStarSystemModel */
+	    $objStarSystemModel = model( StarSystemModel::class );
 	    /** @var \App\Entities\StarSystem $objStarSystem */
-	    $objStarSystem = model( StarSystemModel::class )->findStarSystemEntities(
+	    $objStarSystem = $objStarSystemModel->findStarSystemEntities(
 	            'id'
 	            , $intId
 	            );
 	    $objStarSystem->synchronize();
+	    $objStarSystemModel->findMinorFactions( $objStarSystem );
+	    $objStarSystem->synchronizeMinorFactions();
 	}
 }

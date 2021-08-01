@@ -22,6 +22,8 @@ final class StarSystem extends Base\ExternalData {
             , 'economyPrimary'
             , 'economySecondary'
             , 'eddbId'
+            , 'mainStarClass'
+            , 'mainStarIsScoopable'
             , 'name'
             , 'population'
             , 'security'
@@ -35,11 +37,10 @@ final class StarSystem extends Base\ExternalData {
 
 
     public function findMinorFactions ( Entity $objEntity ): bool {
-        $strPresencePrefix = 'mfp_';
         /** @var \CodeIgniter\Database\ResultInterface $objResult */
         $objResult = $this->db
-            ->table( 'star_system_minor_factions_view' )
-            ->where( [ $strPresencePrefix. 'starSystemId' => $objEntity->id ] )
+            ->table( 'minor_factions_star_systems_view' )
+            ->where( [ 'mfp_starSystemId' => $objEntity->id ] )
             ->get();
 
         $arrResult = $objResult->getResultArray();
@@ -48,11 +49,12 @@ final class StarSystem extends Base\ExternalData {
             return false;
         }
 
-        $strMinorFactionPrefix = 'mfc_';
-        /** @var MinorFactionPresence $objPresenceModel */
-        $objPresenceModel = model( MinorFactionPresence::class );
         /** @var MinorFaction $objMinorFactionModel */
         $objMinorFactionModel = model( MinorFaction::class );
+        /** @var MinorFactionPresence $objPresenceModel */
+        $objPresenceModel = model( MinorFactionPresence::class );
+        /** @var StarSystem $objStarSystemModel */
+        $objStarSystemModel = model( StarSystem::class );
         /**
          * @var PresenceEntity $objPresenceEntity
          * @var MinorFactionEntity $objMinorFactionEntity
@@ -65,20 +67,27 @@ final class StarSystem extends Base\ExternalData {
         foreach ( $arrResult as $arrRow ) {
             $objMinorFactionEntity = $objMinorFactionModel->newFromResultRow(
                     $arrRow
-                    , $strMinorFactionPrefix
+                    , 'mfp_mfc_'
                     );
 
-            if ( ! is_null( $objMinorFactionEntity ) ) {
-                $objEntity->MinorFactions[ $objMinorFactionEntity->name ] = $objMinorFactionEntity;
-                $objPresenceEntity = $objPresenceModel->newFromResultRow(
-                        $arrRow
-                        , $strPresencePrefix
-                        );
-
-                if ( ! is_null( $objPresenceEntity ) ) {
-                    $objMinorFactionEntity->MinorFactionPresence[ $objEntity->name ] = $objPresenceEntity;
-                }
+            if ( is_null( $objMinorFactionEntity ) ) {
+                break;
             }
+
+            $objEntity->MinorFactions[ $objMinorFactionEntity->name ] = $objMinorFactionEntity;
+            $objPresenceEntity = $objPresenceModel->newFromResultRow(
+                    $arrRow
+                    , 'mfp_mfc_mfp_'
+                    );
+
+            if ( is_null( $objPresenceEntity ) ) {
+                break;
+            }
+            $objMinorFactionEntity->MinorFactionPresence[ $objEntity->name ] = $objPresenceEntity;
+            $objPresenceEntity->StarSystem = $objStarSystemModel->newFromResultRow(
+                    $arrRow
+                    , 'mfp_mfc_mfp_sts_'
+                    );
         }
 
         return true;

@@ -1,7 +1,7 @@
 <?php
 namespace App\Entities;
 
-use Config\Services;
+
 use App\Models\BgsTick as Model;
 use CodeIgniter\I18n\Time;
 
@@ -19,7 +19,9 @@ class BgsTick extends Base\External
         $objLastTick = $objModel->GetLastTick();
 
         if ( $objLastTick->canSynchronize() ) {
-            $objBgsCatalogue = Services::bgsCatalogue();
+            /** @var \Config\App $objAppConfig */
+            $objAppConfig = config( 'App' );
+            $objBgsCatalogue = new $objAppConfig->BgsCatalogue();
             $objLastTick = $objBgsCatalogue->getLastTick( $objLastTick );
             $objModel->save( $objLastTick );
         }

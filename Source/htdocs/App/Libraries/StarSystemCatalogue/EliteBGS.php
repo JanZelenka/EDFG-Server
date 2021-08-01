@@ -7,7 +7,7 @@ use App\Entities\MinorFactionPresence as PresenceEntity;
 use App\Entities\StarSystem as Entity;
 use App\Models\MinorFaction as MinorFactionModel;
 use App\Models\StarSystem as Model;
-use App\Libraries\EliteBGS as EliteBGSBase;
+use App\Libraries\TimeOperations;
 use CodeIgniter\I18n\Time;
 /**
  *
@@ -15,20 +15,15 @@ use CodeIgniter\I18n\Time;
  *
  */
 class EliteBGS
-    extends EliteBGSBase
     implements StarSystemCatalogueInterface
 {
-    protected array $starSystemRelationshipMap = [
-            Entity::class => [ '_key' => 'ebgsId' ]
-            , PresenceEntity::class => [ 'StarSystem' => 'ebgsSystemId' ]
-    ];
-
+    use TimeOperations;
     /**
      * Performs the call to Elite BGS and return array of teh data received back or FALSE in case the call fails.
      * @param string $strUrlParams
      * @return ?array
      */
-    protected function callEliteBgs ( string $strUrlParams ): ?array {
+    protected static function callEliteBgs ( string $strUrlParams ): ?array {
         $objConfig = config( 'EliteBGS');
         $objClient = Services::curlrequest();
         $objResponse = $objClient->request(
@@ -46,7 +41,7 @@ class EliteBGS
         }
     }
 
-    public function getMinorFactionStarSystems ( $MinorFaction ): bool {
+    public static function getMinorFactionStarSystems ( $MinorFaction ): bool {
         if ( ! is_array( $MinorFaction ) ) {
             if ( ! $MinorFaction instanceof MinorFactionEntity) {
                 throw 'Parameter must be of type ' . MinorFactionEntity::class;
@@ -96,13 +91,13 @@ class EliteBGS
                         ? ''
                         : '&page=' . $intPage
                         );
-            $arrData = $this->callEliteBgs( $strFinalUrlParams );
+            $arrData = self::callEliteBgs( $strFinalUrlParams );
 
             foreach ( $arrData[ 'docs' ] as $arrStarSystem) {
                 foreach ( $arrStarSystem[ 'factions' ] as $arrMinorfaction ) {
                     $objMinorFaction = $MinorFaction[ $arrMinorfaction[ 'name' ] ] ?? null;
 
-                    if ( ! is_null( $objMinorFaction ) ) {
+                    if ( isset( $objMinorFaction ) ) {
                         /** @var PresenceEntity $objPresence */
                         $objPresence = $objMinorFaction->MinorFactionPresence[ $arrStarSystem[ 'name' ] ] ?? null;
 
@@ -123,7 +118,7 @@ class EliteBGS
                                 $objPresence->StarSystem = $objEntity;
                             }
 
-                            $this->setEntityData(
+                            self::setEntityData(
                                     $objEntity
                                     , $arrStarSystem
                                     , true
@@ -134,7 +129,7 @@ class EliteBGS
             }
 
             $intPage = $arrData[ 'nextPage' ];
-        } while ( ! is_null( $intPage ) );
+        } while ( isset( $intPage ) );
 
         return true;
     }
@@ -144,7 +139,7 @@ class EliteBGS
      *
      * @see \App\Libraries\StarSystemCatalogue\StarSystemCatalogueInterface::getStarSystems()
      */
-    public function getStarSystem ( Entity $objEntity ): bool
+    public static function getStarSystem ( Entity $objEntity ): bool
     {
         /**
          * @var \CodeIgniter\HTTP\CURLRequest $objClient
@@ -175,29 +170,20 @@ class EliteBGS
             throw new \Exception( 'No recognized parameter specified.' );
         }
 
-        $arrData = $this->callEliteBgs($strUrlParams);
+        $arrData = self::callEliteBgs($strUrlParams);
 
         if ( is_null( $arrData ) ) {
             return false;
         }
 
-        $this->setEntityData(
+        self::setEntityData(
                 $objEntity
                 , $arrData[ 'docs' ][0]
                 );
         return true;
     }
 
-    /**
-     *
-     * {@inheritDoc}
-     * @see \App\Libraries\StarSystemCatalogue\StarSystemCatalogueInterface::externalKey()
-     */
-    public function externalKey(): string {
-        return 'ebgsId';
-    }
-
-    protected function setEntityData(
+    protected static function setEntityData(
             Entity $objEntity
             , array $arrData
             , bool $blnNoFactions = false
@@ -216,7 +202,7 @@ class EliteBGS
         $objEntity->population = $arrData[ 'population' ];
         $objEntity->security = $arrData[ 'security' ];
         $objEntity->state = $arrData[ 'state' ];
-        $objEntity->updatedOn = $this->getTime( $arrData[ 'updated_at' ] );
+        $objEntity->updatedOn = self::getTime( $arrData[ 'updated_at' ] );
 
         if ( $blnNoFactions ) {
             return;

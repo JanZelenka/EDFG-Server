@@ -38,7 +38,7 @@ class Stamped extends Base {
         $objSession = Services::session();
         $objUser = $objSession->User;
 
-        if ( ! is_null( $objUser ) ) {
+        if ( isset( $objUser ) ) {
             if ( is_object( $data ) )
                 $data->zzzCreatedBy = $objUser->username;
             elseif ( is_array( $data ) )
@@ -64,7 +64,7 @@ class Stamped extends Base {
         $objSession = Services::session();
         $objUser = $objSession->User;
 
-        if ( ! is_null( $objUser ) ) {
+        if ( isset( $objUser ) ) {
             if ( is_object( $data ) )
                 $data->zzzModifiedBy = $objUser->username;
             elseif ( is_array( $data ) )

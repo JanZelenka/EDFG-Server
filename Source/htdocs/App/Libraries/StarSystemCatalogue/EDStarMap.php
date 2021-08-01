@@ -11,12 +11,16 @@ use App\Entities\StarSystem;
  */
 class EDStarMap implements StarSystemCatalogueInterface
 {
+    public static function getMinorFactionStarSystems ( $MinorFaction ): bool {
+        return false;
+    }
+
     /**
      * (non-PHPdoc)
      *
      * @see \App\Libraries\StarSystemCatalogue\StarSystemCatalogueInterface::getStarSystems()
      */
-    public function getStarSystem ( StarSystem $objStarSystem )
+    public static function getStarSystem ( StarSystem $objStarSystem ): bool
     {
         /** @var \Config\EDStarMap $objConfig */
         /** @var \CodeIgniter\HTTP\CURLRequest $objClient */
@@ -24,24 +28,27 @@ class EDStarMap implements StarSystemCatalogueInterface
 
         $strName = $objStarSystem->name;
 
-        if ( empty( $strName ) )
+        if ( empty( $strName ) ) {
             throw new \Exception( 'Parameter \'name\' is missing.' );
+        }
 
-        $strURLParams = '?showCoordinates=1&systemName' . urlencode( $strName );
+        $strURLParams = '?showPrimaryStar=1&systemName=' . urlencode( $strName );
 
         $objConfig = config( 'EDStarMap');
         $objClient = Services::curlrequest();
         $objResponse = $objClient->request(
                 'GET'
-                , $objConfig->strBaseURL . 'systems' . $strURLParams
+                , $objConfig->strUrlRoot . 'systems' . $strURLParams
                 );
 
         if ($objResponse->getStatusCode() < 300 ) {
-            $objStarSystemData = json_decode( $objResponse->getBody() );
-            $objStarSystem->name = $objStarSystemData->name;
-            $objStarSystem->coordX = $objStarSystemData->coords->x;
-            $objStarSystem->coordY = $objStarSystemData->coords->y;
-            $objStarSystem->coordZ = $objStarSystemData->coords->z;
+            $arrData = json_decode(
+                    $objResponse->getBody()
+                    , true
+                    );
+            $arrPrimaryStar = $arrData[ 0 ][ 'primaryStar' ];
+            $objStarSystem->mainStarClass = $arrPrimaryStar[ 'type'];
+            $objStarSystem->mainStarIsScoopable = $arrPrimaryStar[ 'isScoopable' ];
         } else {
             return false;
         }
@@ -49,4 +56,3 @@ class EDStarMap implements StarSystemCatalogueInterface
         return true;
     }
 }
-

@@ -17,7 +17,7 @@ interface StarSystemCatalogueInterface
      * @param array|\App\Entities\MinorFaction $objMinorFaction
      * @return bool
      */
-    public function getMinorFactionStarSystems ( $MinorFaction ): bool;
+    public static function getMinorFactionStarSystems ( $MinorFaction ): bool;
 
     /**
      * Gets Elite BGS Star System data for the specified Star System.
@@ -25,5 +25,5 @@ interface StarSystemCatalogueInterface
      * @param array|\App\Entities\StarSystem $objEntity
      * @return bool
      */
-    public function getStarSystem ( Entity $StarSystem ) : bool;
+    public static function getStarSystem ( Entity $StarSystem ) : bool;
 }

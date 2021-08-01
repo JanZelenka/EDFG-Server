@@ -3,7 +3,7 @@ namespace App\Libraries\BgsCatalogue;
 
 use Config\Services;
 use App\Entities\BgsTick;
-use App\Libraries\EliteBGS as EliteBGSBase;
+use App\Libraries\TimeOperations;
 use CodeIgniter\I18n\Time;
 use App;
 /**
@@ -12,16 +12,16 @@ use App;
  *
  */
 class EliteBGS
-    extends EliteBGSBase
     implements BgsCatalogueInterface
 {
+    use TimeOperations;
 
     /**
      * (non-PHPdoc)
      *
      * @see \App\Libraries\BgsCatalogue\BgsCatalogueInterface::getLastTick()
      */
-    public function getLastTick ( BgsTick $objBgsTick ): BgsTick {
+    public static function getLastTick ( BgsTick $objBgsTick ): BgsTick {
         /** @var \Config\EliteBGS $objConfig */
         $objConfig = config( 'EliteBGS');
         $objClient = Services::curlrequest();
@@ -40,7 +40,7 @@ class EliteBGS
             if ( $arrTickData[ '_id' ] !== $objBgsTick->ebgsId ) {
                 $objBgsTick = new BgsTick( [
                         'ebgsId' => $arrTickData[ '_id' ]
-                        , 'updatedOn' => $this->getTime( $arrTickData[ 'time' ] )
+                        , 'updatedOn' => self::getTime( $arrTickData[ 'time' ] )
                         ] );
             }
 

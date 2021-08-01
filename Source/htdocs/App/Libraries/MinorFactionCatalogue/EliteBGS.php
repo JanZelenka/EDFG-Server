@@ -4,9 +4,8 @@ namespace App\Libraries\MinorFactionCatalogue;
 use Config\Services;
 use App\Entities\MinorFaction as Entity;
 use App\Entities\MinorFactionPresence as PresenceEntity;
-use App\Libraries\EliteBGS as EliteBGSBase;
+use App\Libraries\TimeOperations;
 use CodeIgniter\I18n\Time;
-use App\Entities\MinorFaction;
 
 /**
  *
@@ -14,24 +13,16 @@ use App\Entities\MinorFaction;
  *
  */
 class EliteBGS
-    extends EliteBGSBase
     implements MinorFactionCatalogueInterface
 {
+    use TimeOperations;
+
     /**
      * Caches results of the calls to EliteBGS factions endpoint during the lifetime of the object so that
      * unnecessary calls are avoided
      * @var array
      */
-    protected array $data = array();
-
-    protected array $presenceRelationshipMap = [
-            \App\Entities\MinorFaction::class => [ 'MinorFactionPresence' => 'starSystemId']
-    ];
-    /**
-     *
-     * @var string
-     */
-    protected string $presenceDataIdKey = 'system_id';
+    protected static array $data = array();
 
     /**
      *
@@ -39,7 +30,7 @@ class EliteBGS
      * @throws \Exception
      * @return array
      */
-    protected function callEliteBgs ( string $strUrlParams ): array {
+    protected static function callEliteBgs ( string $strUrlParams ): array {
         /**
          * @var \CodeIgniter\HTTP\CURLRequest $objClient
          * @var \CodeIgniter\HTTP\Response $objResponse
@@ -70,7 +61,7 @@ class EliteBGS
      *
      * @see \App\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface::getMinorFaction()
      */
-    public function getMinorFaction ( $MinorFaction ): bool    {
+    public static function getMinorFaction ( $MinorFaction ): bool    {
         if ( ! is_array( $MinorFaction ) ) {
             if ( ! $MinorFaction instanceof Entity) {
                 throw 'Parameter must be of type ' . Entity::class;
@@ -79,7 +70,7 @@ class EliteBGS
             $MinorFaction = [ $MinorFaction->name => $MinorFaction ];
         }
 
-        $arrData = $this->getData( $MinorFaction );
+        $arrData = self::getData( $MinorFaction );
 
         if ( empty( $arrData ) ) {
             return false;
@@ -95,7 +86,7 @@ class EliteBGS
             $objEntity->government = $arrDoc[ 'government' ];
             $objEntity->lastCheckOn = $arrMinorFaction[ 'lastCheckOn' ];
             $objEntity->name = $arrDoc[ 'name' ];
-            $objEntity->updatedOn = $this->getTime( $arrDoc[ 'updated_at' ] );
+            $objEntity->updatedOn = self::getTime( $arrDoc[ 'updated_at' ] );
         }
 
         return true;
@@ -107,7 +98,7 @@ class EliteBGS
      * @throws \Exception
      * @return array
      */
-    protected function getData ( $arrMinorFactions ): array {
+    protected static function getData ( $arrMinorFactions ): array {
         $arrResult = [];
         $arrParams = [];
 
@@ -115,8 +106,8 @@ class EliteBGS
         foreach ( $arrMinorFactions as $objEntity ) {
             $strName = $objEntity->name;
 
-            if ( isset( $this->data[ $strName ] ) ) {
-                $arrResult[ $strName ] = $this->data[ $strName ];
+            if ( isset( self::$data[ $strName ] ) ) {
+                $arrResult[ $strName ] = self::$data[ $strName ];
             } else {
                 $strKeyValue = $objEntity->ebgsId;
 
@@ -150,24 +141,24 @@ class EliteBGS
                             ? ''
                             : '&page=' . $intPage
                             );
-                $arrData = $this->callEliteBgs( $strFinalUrlParams );
+                $arrData = self::callEliteBgs( $strFinalUrlParams );
 
                 foreach ( $arrData[ 'docs' ] as $arrDoc ) {
                     $strName = $arrDoc[ 'name' ];
-                    $arrResult[ $strName ] = $this->data[ $strName ] = [
+                    $arrResult[ $strName ] = self::$data[ $strName ] = [
                             'doc' => $arrDoc
                             , 'lastCheckOn' => Time::now()
                             ];
                 }
 
                 $intPage = $arrData[ 'nextPage' ];
-            } while ( ! is_null( $intPage ) );
+            } while ( isset( $intPage ) );
         }
 
         return $arrResult;
     }
 
-    public function getPresence ( $MinorFaction ): bool {
+    public static function getPresence ( $MinorFaction ): bool {
         if ( ! is_array( $MinorFaction ) ) {
             if ( ! $MinorFaction instanceof Entity) {
                 throw 'Parameter must be of type ' . Entity::class;
@@ -176,7 +167,7 @@ class EliteBGS
             $MinorFaction = [ $MinorFaction->name => $MinorFaction ];
         }
 
-        $arrData = $this->getData( $MinorFaction );
+        $arrData = self::getData( $MinorFaction );
 
         if ( empty( $arrData ) ) {
             return false;
@@ -194,29 +185,11 @@ class EliteBGS
                         ?? $objEntity->MinorFactionPresence[ $strSystemName ] = new PresenceEntity();
                 $objPresence->ebgsSystemId = $arrPresence[ 'system_id' ];
                 $objPresence->influence = $arrPresence[ 'influence' ];
-                $objPresence->updatedOn = $this->getTime( $arrPresence[ 'updated_at'] );
+                $objPresence->updatedOn = self::getTime( $arrPresence[ 'updated_at'] );
             }
         }
 
         return true;
-    }
-
-    /**
-     *
-     * {@inheritDoc}
-     * @see \App\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface::externalKey()
-     */
-    public function externalKey(): string {
-        return 'ebgsId';
-    }
-
-    /**
-     *
-     * {@inheritDoc}
-     * @see \App\Libraries\MinorFactionCatalogue\MinorFactionCatalogueInterface::externalPresenceKey()
-     */
-    public function externalPresenceKey (): string {
-        return 'ebgsSystemId';
     }
 }
 

@@ -472,21 +472,29 @@ class App extends BaseConfig
 	 * generic BGS data.
 	 * @var string
 	 */
-	public $BgsCatalogue = \App\Libraries\BgsCatalogue\EliteBGS::class;
+	public $BgsCatalogue = '\\App\\Libraries\\BgsCatalogue\\EliteBGS';
 
 	/**
 	 * Defines the Mimor Faction Catalogue implementation to be used when
 	 * retrieving minor faction data from external service.
 	 * @var string
 	 */
-	public $MinorFactionCatalogue = \App\Libraries\MinorFactionCatalogue\EliteBGS::class;
+	public $MinorFactionCatalogue = '\\App\\Libraries\\MinorFactionCatalogue\\EliteBGS';
 
 	/**
 	 * Defines the Star System Catalogue implementation to be used when
 	 * retrieving star system data from external service.
 	 * @var string
 	 */
-	public $StarSystemCatalogue = \App\Libraries\StarSystemCatalogue\EliteBGS::class;
+	public $StarSystemCatalogue = '\\App\\Libraries\\StarSystemCatalogue\\EliteBGS';
+
+	/**
+	 * Defines the Star System Catalogue implementation to be used when
+	 * retrieving main star of a star system data from external service.
+	 * @var string
+	 */
+	public $MainStarInfoCatalogue = '\\App\\Libraries\\StarSystemCatalogue\\EDStarMap';
+
 	/**
 	 * Number of seconds
 	 * Defines a period after which the tick check is no longer considerate and every tick query will reach out for the BGS service to get the most recent data.

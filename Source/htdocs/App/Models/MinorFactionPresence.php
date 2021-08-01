@@ -68,7 +68,7 @@ class MinorFactionPresence extends Base\ExternalData
     public function save( $MinorFactionPresence = null ): bool {
         if ( $MinorFactionPresence instanceof Entity ) {
             /** @var \App\Entities\MinorFactionPresence $MinorFactionPresence */
-            if ( ! is_null( $MinorFactionPresence->StarSystem ) ) {
+            if ( isset( $MinorFactionPresence->StarSystem ) ) {
                 model( StarSystemModel::class )->save( $MinorFactionPresence->StarSystem );
                 $MinorFactionPresence->starSystemId = $MinorFactionPresence->StarSystem->id;
             }

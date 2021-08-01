@@ -44,7 +44,7 @@ class Base extends SystemModel
             , ?array $arrLoadedEntities = null
             ): ?BaseEntity
     {
-        if ( ! is_null( $arrLoadedEntities ) ) {
+        if ( isset( $arrLoadedEntities ) ) {
             if ( is_null( $strExternalKey ) ) {
                 return null;
             }
@@ -60,7 +60,7 @@ class Base extends SystemModel
                 );
 
         if (
-                ! is_null( $arrLoadedEntities )
+                isset( $arrLoadedEntities )
                  &&
                 ! empty( $varId ) )
         {

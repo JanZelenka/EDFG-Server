@@ -22,7 +22,7 @@ helper( 'deployment' );
 	<?= $this->renderSection( 'styles') ?>
 </head>
 <body>
-	<main role="main" class="container">
+	<main role="main" class="container-fluid">
 		<?= $this->renderSection( 'dialogs' ) ?>
 		<?= $this->include( 'Include/part_navigation_top' ) ?>
 		<?= $this->renderSection( 'main' ) ?>

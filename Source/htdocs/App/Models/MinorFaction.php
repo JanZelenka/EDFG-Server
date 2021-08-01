@@ -79,7 +79,7 @@ final class MinorFaction extends Base\ExternalData
                     , $strPresencePrefix
                     );
 
-            if ( ! is_null( $objPresenceEntity ) ) {
+            if ( isset( $objPresenceEntity ) ) {
                 $objPresenceEntity->StarSystem = $objStarSystemModel->newFromResultRow(
                         $arrRow
                         , $strStarSystemPrefix

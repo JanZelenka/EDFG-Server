@@ -32,6 +32,7 @@ class External extends Base
     }
 
     public function checkExpiryInterval ( int $intOffset = 0): \DateInterval {
+        /** @var \Config\App $objAppConfig */
         $objAppConfig = config( 'App' );
         $objLastCheckExpiryInterval = new \DateInterval( 'PT' . ( $objAppConfig->ExternalCheckExpiryPeriod + $intOffset ) . 'S' );
         $objLastCheckExpiryInterval->invert = 1;

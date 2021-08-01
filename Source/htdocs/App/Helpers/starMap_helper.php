@@ -13,8 +13,14 @@ if ( ! function_exists ('translateCoords' ) ) {
 	};
 }
 
+if ( ! function_exists ( 'starSystemClassColor' ) ) {
+    function starSystemClassColor ( string $strStarClass ): string {
+        return \App\Entities\StarSystem::STAR_CLASS_COLORS[ $strStarClass ];
+    }
+}
+
 if ( ! function_exists ( 'starSystemInfluenceColor' ) ) {
     function starSystemInfluenceColor ( float $fltInfluence ): string {
-        return ( 1 - $fltInfluence) . ' ' . $fltInfluence . ' 0';
+        return ( 1 - $fltInfluence ) . ' ' . $fltInfluence . ' 0';
     }
 }
