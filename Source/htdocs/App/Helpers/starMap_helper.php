@@ -24,3 +24,9 @@ if ( ! function_exists ( 'starSystemInfluenceColor' ) ) {
         return ( 1 - $fltInfluence ) . ' ' . $fltInfluence . ' 0';
     }
 }
+
+if ( ! function_exists ( 'starSystemSecurityColor' ) ) {
+    function starSystemSecurityColor ( string $strSecurity ): string {
+        return \App\Entities\StarSystem::SECURITY_COLORS[ $strSecurity ];
+    }
+}

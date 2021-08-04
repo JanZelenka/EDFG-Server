@@ -1,0 +1,10 @@
+#starMapView {
+	position: absolute;
+	top: 40px;
+	bottom: 0px;
+	width: 100%;
+}
+
+#x3DViewer {
+	background-image: url( '../resources/beautiful-blue-stars-fill.jpg' );
+}

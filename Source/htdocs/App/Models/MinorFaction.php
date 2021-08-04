@@ -129,10 +129,20 @@ final class MinorFaction extends Base\ExternalData
         {
             //Saving the Minor Faction Presence data as well.
             $objPresenceModel = model( MinorFactionPresence::class );
+            $arrToBeDeleted = [];
 
-            foreach ( $MinorFaction->MinorFactionPresence as $objPresenceEntity ) {
-                $objPresenceEntity->minorFactionId = $MinorFaction->id;
-                $objPresenceModel->save( $objPresenceEntity );
+            foreach ( $MinorFaction->MinorFactionPresence as $strKey => $objPresenceEntity ) {
+                if ( $objPresenceEntity->_exists ) {
+                    $objPresenceEntity->minorFactionId = $MinorFaction->id;
+                    $objPresenceModel->save( $objPresenceEntity );
+                } else {
+                    $arrToBeDeleted[] = $objPresenceEntity->id;
+                    unset( $MinorFaction->MinorFactionPresence[ $strKey ] );
+                }
+            }
+
+            if ( ! empty( $arrToBeDeleted ) ) {
+                $objPresenceModel->delete( $arrToBeDeleted );
             }
         }
 

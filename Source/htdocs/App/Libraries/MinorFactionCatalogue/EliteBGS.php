@@ -186,6 +186,7 @@ class EliteBGS
                 $objPresence->ebgsSystemId = $arrPresence[ 'system_id' ];
                 $objPresence->influence = $arrPresence[ 'influence' ];
                 $objPresence->updatedOn = self::getTime( $arrPresence[ 'updated_at'] );
+                $objPresence->_exists = true;
             }
         }
 

@@ -29,6 +29,12 @@ class StarSystem extends Base\External
     /** @var ?array \App\Entities\MinorFactionPresence */
     public ?array $MinorFactions = null;
 
+    public const SECURITY_COLORS = [
+            '$system_security_high;' => '0.1 0.9 0'
+            , '$system_security_high_anarchy;' => '1 0 1'
+            , '$system_security_low;' => '0.9 0.1 0'
+            , '$system_security_medium;' => '0.5 0.5 0'
+            ];
     public const STAR_CLASS_COLORS = [
             'A (Blue-White) Star' => '0.7843 0.8353 1'
             , 'A (Blue-White super giant) Star' => '0.8118 0.8588 1'

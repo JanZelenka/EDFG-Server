@@ -17,6 +17,8 @@ use App;
  */
 class MinorFactionPresence extends Base\External
 {
+    /** @var bool $_exists */
+    public bool $_exists = false;
     /** @var ?App\Entities\StarSystem $StarSystem */
     public ?StarSystem $StarSystem = null;
 }
