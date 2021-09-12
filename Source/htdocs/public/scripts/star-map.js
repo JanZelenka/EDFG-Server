@@ -14,5 +14,5 @@ function applyFilter ( objTrigger ) {
                 );
     }
     
-    document.querySelector( 'selectedModeDisplay' ).innerHTML = objTrigger.innerHTML;
+    document.querySelector( '#selectedModeDisplay' ).innerHTML = objTrigger.text;
 }
